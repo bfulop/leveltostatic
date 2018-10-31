@@ -1,0 +1,19 @@
+{
+  "name": "quivertoleveltostatic",
+  "version": "0.0.1",
+  "description": "export to a static site",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bfulop/leveltostatic.git"
+  },
+  "author": "Balint Fulop <bfulop@mac.com> (http://abundancia.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bfulop/leveltostatic/issues"
+  },
+  "homepage": "https://github.com/bfulop/leveltostatic#readme"
+}
