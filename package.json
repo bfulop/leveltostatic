@@ -3,8 +3,13 @@
   "version": "0.0.1",
   "description": "export to a static site",
   "main": "index.js",
+  "jest": {
+    "testEnvironment": "node"
+  },
   "scripts": {
-    "test": "test"
+    "main": "node src/run",
+    "test": "jest --env node",
+    "test:watch": "jest --watch --env node"
   },
   "repository": {
     "type": "git",
@@ -15,5 +20,15 @@
   "bugs": {
     "url": "https://github.com/bfulop/leveltostatic/issues"
   },
-  "homepage": "https://github.com/bfulop/leveltostatic#readme"
+  "homepage": "https://github.com/bfulop/leveltostatic#readme",
+  "devDependencies": {
+    "jest": "^23.6.0",
+    "to-readable-stream": "^1.0.0"
+  },
+  "dependencies": {
+    "folktale": "^2.3.1",
+    "immutable": "^4.0.0-rc.12",
+    "immutable-ext": "^1.1.5",
+    "level": "^4.0.0"
+  }
 }
