@@ -1,9 +1,10 @@
 const { task } = require('folktale/concurrency/task')
-const level = require('level')
+const db = require('./getdb')
 const to = require('to2')
 
 const write = (buf, enc, next) => {
-  console.log('buf', buf)
+  console.log('buf', buf.toString())
+  console.log('%%%%%%%%%%%%%%%%%%%%%')
   next()
 }
 const end = r => next => {
@@ -12,6 +13,6 @@ const end = r => next => {
   next()
 }
 
-const runme = () => task(r => level().pipe(to(write, end(r))))
+const runme = () => task(r => db().createKeyStream().pipe(to(write, end(r))))
 
 module.exports = runme

@@ -23,6 +23,7 @@
   "homepage": "https://github.com/bfulop/leveltostatic#readme",
   "devDependencies": {
     "jest": "^23.6.0",
+    "memdown": "^3.0.0",
     "to-readable-stream": "^1.0.0"
   },
   "dependencies": {

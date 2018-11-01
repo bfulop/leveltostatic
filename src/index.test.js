@@ -1,8 +1,12 @@
-const toReadableStream = require('to-readable-stream')
+const levelup = require('levelup')
+const memdown = require('memdown')
 
-jest.mock('level')
-const level = require('level')
-level.mockReturnValue(toReadableStream('blah'))
+const db = levelup(memdown())
+db.put('hey', 'you')
+
+jest.mock('./getdb')
+const getDB = require('./getdb')
+getDB.mockReturnValue(db)
 
 const subject = require('./index')
 
