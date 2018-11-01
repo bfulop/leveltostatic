@@ -29,6 +29,7 @@
     "folktale": "^2.3.1",
     "immutable": "^4.0.0-rc.12",
     "immutable-ext": "^1.1.5",
-    "level": "^4.0.0"
+    "level": "^4.0.0",
+    "to2": "^1.0.0"
   }
 }
