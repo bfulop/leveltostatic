@@ -29,8 +29,8 @@ describe('walking through the db', () => {
       .put('anotebook:ba:103:baa1')
       .put('anotebook:ba:104:baa2')
       .put('anotebook:ba:105:baa3')
-      .put('notebooks:100:aa')
-      .put('notebooks:103:ba')
+      .put('notebooks:100:aa', 'notebook aa')
+      .put('notebooks:103:ba', 'notebook ba')
       .write(() => {
         done()
       })
@@ -49,7 +49,7 @@ describe('walking through the db', () => {
     expect(createNotePage.mock.calls[0][0]).toEqual({
       notedata: { meta: { notebook: 'aa' }, content: 'note_aaa1_data' },
       siblings: ['aaa1', 'aaa2', 'aaa3'],
-      notebooks: ['aa', 'ba']
+      notebooks: ['notebook aa', 'notebook ba']
     })
     done()
   })
