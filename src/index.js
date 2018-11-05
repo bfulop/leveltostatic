@@ -5,11 +5,28 @@ const to = require('to2')
 const through = require('through2')
 const createNotePage = require('./createNotePage')
 
-const siblingNotes = () => of(['aaa1', 'aaa2', 'aaa3'])
+const siblingNotes = nbookid => of(['aaa1', 'aaa2', 'aaa3'])
 
+const getSiblings = nbookid => {
+  let notes = []
+  return task(r =>
+    db
+      .createValueStream({
+        valueAsBuffer: false,
+        gt: `anotebook:${nbookid}:`,
+        lt: `anotebook:${nbookid}:~`,
+      })
+      .pipe(through((chunk, enc, next) => {
+        notes.push(chunk.toString())
+        next()
+      }, next => {
+        r.resolve(notes)
+        next()
+      }))
+  )
+}
 const getNoteBooks = () => {
   let notebooks = []
-  console.log('-------------------------')
   return task(r =>
     db
       .createValueStream({
@@ -18,7 +35,6 @@ const getNoteBooks = () => {
         lt: 'notebooks:~'
       })
       .pipe(through((chunk, enc, next) => {
-        console.log('chunk %o', chunk.toString())
         notebooks.push(chunk.toString())
         next()
       }, next => {
@@ -32,7 +48,7 @@ const listNoteBooks = R.memoizeWith(R.identity, getNoteBooks)
 // const noteBooks = () => of(['aa', 'ba'])
 
 const collectParents = R.compose(
-  e => siblingNotes(e).and(getNoteBooks()),
+  e => getSiblings(e).and(getNoteBooks()),
   R.path(['meta', 'notebook'])
 )
 

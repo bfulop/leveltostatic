@@ -23,12 +23,12 @@ describe('walking through the db', () => {
       .put('note:baa1', { meta: { notebook: 'aa' }, content: 'note_baa1_data' })
       .put('note:baa2', { meta: { notebook: 'aa' }, content: 'note_baa2_data' })
       .put('note:baa3', { meta: { notebook: 'aa' }, content: 'note_baa3_data' })
-      .put('anotebook:aa:100:aaa1')
-      .put('anotebook:aa:101:aaa2')
-      .put('anotebook:aa:102:aaa3')
-      .put('anotebook:ba:103:baa1')
-      .put('anotebook:ba:104:baa2')
-      .put('anotebook:ba:105:baa3')
+      .put('anotebook:aa:100:aaa1', 'note aaa1')
+      .put('anotebook:aa:101:aaa2', 'note aaa2')
+      .put('anotebook:aa:102:aaa3', 'note aaa3')
+      .put('anotebook:ba:103:baa1', 'note baa1')
+      .put('anotebook:ba:104:baa2', 'note baa2')
+      .put('anotebook:ba:105:baa3', 'note baa3')
       .put('notebooks:100:aa', 'notebook aa')
       .put('notebooks:103:ba', 'notebook ba')
       .write(() => {
@@ -48,7 +48,7 @@ describe('walking through the db', () => {
   test('calls a createNotePage', done => {
     expect(createNotePage.mock.calls[0][0]).toEqual({
       notedata: { meta: { notebook: 'aa' }, content: 'note_aaa1_data' },
-      siblings: ['aaa1', 'aaa2', 'aaa3'],
+      siblings: ['note aaa1', 'note aaa2', 'note aaa3'],
       notebooks: ['notebook aa', 'notebook ba']
     })
     done()
