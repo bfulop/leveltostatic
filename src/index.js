@@ -45,8 +45,6 @@ const getNoteBooks = () => {
 }
 const listNoteBooks = R.memoizeWith(R.identity, getNoteBooks)
 
-// const noteBooks = () => of(['aa', 'ba'])
-
 const collectParents = R.compose(
   e => getSiblings(e).and(getNoteBooks()),
   R.path(['meta', 'notebook'])
