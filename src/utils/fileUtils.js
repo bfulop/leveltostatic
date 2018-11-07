@@ -1,6 +1,6 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
-const { task } = require('folktale/concurrency/task')
+const { task, fromPromised } = require('folktale/concurrency/task')
 
 function readFile(filename) {
   return task(resolver =>
@@ -36,19 +36,9 @@ const writeFileToDisk = (filepath, contents) => {
   })
 }
 
-const mkdir = path => {
-  return task(resolver => {
-    fs.mkdir(path.replace(/\/\w+\.html$/g, ''), { recursive: true }, err => {
-      if (err) {
-        resolver.reject('file not saved!')
-        return
-      }
-      resolver.resolve(path)
-    })
-  })
-}
+const ensureFileT = fromPromised(fs.ensureFile)
 
 const writeFile = ({ filepath, contents }) =>
-  mkdir(filepath).chain(() => writeFileToDisk(filepath, contents))
+  ensureFileT(filepath).chain(() => writeFileToDisk(filepath, contents))
 
 module.exports = { readFile, readDir, writeFile }
