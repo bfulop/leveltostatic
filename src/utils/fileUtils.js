@@ -24,7 +24,7 @@ function readDir(dirpath) {
   )
 }
 
-function writeFile([filepath, contents]) {
+function writeFile({filepath, contents}) {
   return task(resolver => {
     fr.writeFile(filepath, contents, 'utf8', err => {
       if (err) {

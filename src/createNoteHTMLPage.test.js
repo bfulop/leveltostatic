@@ -5,7 +5,7 @@ const { writeFile } = require('./utils/fileUtils')
 writeFile.mockReturnValue('file written')
 
 const subject = require('./createNoteHTMLPage')
-describe('creates the tuple for writeFile', () => {
+describe('creates path and content for writeFile', () => {
   beforeAll(done => {
     subject({
       notedata: {
@@ -19,7 +19,10 @@ describe('creates the tuple for writeFile', () => {
     })
     done()
   })
-  test('calls writeFile with a tuple', () => {
-    expect(writeFile.mock.calls[0][0]).toEqual(['thepath', 'the content'])
+  test('creates the correct path', () => {
+    expect(writeFile.mock.calls[0][0]).toMatchObject({path: 'thepath'})
+  })
+  test('adds the HTML', () => {
+    expect(writeFile.mock.calls[0][0]).toMatchObject({html: 'the content'})
   })
 })
