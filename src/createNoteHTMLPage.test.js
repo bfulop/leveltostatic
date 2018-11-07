@@ -2,10 +2,15 @@ const { of } = require('folktale/concurrency/task')
 
 const notedata = {
   notedata: {
-    meta: {
-      title: 'thepath'
+    nbook: {
+      name: 'a long & name éü ? #'
     },
-    content: 'the content'
+    note: {
+      meta: {
+        title: 'Exercise: Adding Webpack'
+      },
+      content: 'the content'
+    }
   },
   sibling: ['s1', 's2'],
   notebooks: ['nb1', 'nb2']
@@ -26,7 +31,7 @@ describe('creates path and content for writeFile', () => {
     done()
   })
   test('creates the correct path', () => {
-    expect(writeFile.mock.calls[0][0]).toMatchObject({ path: 'thepath' })
+    expect(writeFile.mock.calls[0][0]).toMatchObject({ path: 'exercise-adding-webpack/a-long-and-name-eu.html' })
   })
   test('adds the HTML', () => {
     expect(writeFile.mock.calls[0][0]).toMatchObject({ html: 'html content' })
