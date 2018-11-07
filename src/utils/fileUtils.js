@@ -24,7 +24,7 @@ function readDir(dirpath) {
   )
 }
 
-function writeFile({filepath, contents}) {
+const writeFileToDisk = (filepath, contents) => {
   return task(resolver => {
     fr.writeFile(filepath, contents, 'utf8', err => {
       if (err) {
@@ -35,5 +35,20 @@ function writeFile({filepath, contents}) {
     })
   })
 }
+
+const mkdir = path => {
+  return task(resolver => {
+    fs.mkdir(path.replace(/\/\w+\.html$/g, ''), { recursive: true }, err => {
+      if (err) {
+        resolver.reject('file not saved!')
+        return
+      }
+      resolver.resolve(path)
+    })
+  })
+}
+
+const writeFile = ({ filepath, contents }) =>
+  mkdir(filepath).chain(() => writeFileToDisk(filepath, contents))
 
 module.exports = { readFile, readDir, writeFile }
