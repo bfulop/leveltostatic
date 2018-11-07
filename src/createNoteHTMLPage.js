@@ -6,7 +6,6 @@ const logger = r => {
   console.log('r', r)
   return r
 }
-const generateHMTL = R.path(['notedata', 'content'])
 const createNoteHTML = R.ap(R.mergeDeepLeft, R.compose(R.objOf('html'), generateNoteHTML))
 
 const getPath = R.compose(R.objOf('path'), R.path(['notedata', 'meta', 'title']))
