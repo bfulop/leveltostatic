@@ -1,9 +1,15 @@
 const { task, of } = require('folktale/concurrency/task')
 const R = require('ramda')
-const db = require('./getdb')()
+const db = require('./getdb')
 const to = require('to2')
 const through = require('through2')
 const createNotePage = require('./createNotePage')
+
+const logger = r => {
+  console.log('r')
+  console.log(r)
+  return r
+}
 
 const siblingNotes = nbookid => of(['aaa1', 'aaa2', 'aaa3'])
 
@@ -12,17 +18,11 @@ const getSiblings = nbookid => {
   return task(r =>
     db
       .createValueStream({
-        valueAsBuffer: false,
         gt: `anotebook:${nbookid}:`,
         lt: `anotebook:${nbookid}:~`,
       })
-      .pipe(through((chunk, enc, next) => {
-        notes.push(chunk.toString())
-        next()
-      }, next => {
-        r.resolve(notes)
-        next()
-      }))
+      .on('data', d => notes.push(JSON.parse(d)))
+      .on('end', () => r.resolve(notes))
   )
 }
 const getNoteBooks = () => {
@@ -30,24 +30,18 @@ const getNoteBooks = () => {
   return task(r =>
     db
       .createValueStream({
-        valueAsBuffer: false,
         gt: 'notebooks:',
         lt: 'notebooks:~'
       })
-      .pipe(through((chunk, enc, next) => {
-        notebooks.push(chunk.toString())
-        next()
-      }, next => {
-        r.resolve(notebooks)
-        next()
-      }))
+      .on('data', d => notebooks.push(JSON.parse(d)))
+      .on('end', () => r.resolve(notebooks))
   )
 }
 const listNoteBooks = R.memoizeWith(R.identity, getNoteBooks)
 
 const collectParents = R.compose(
   e => getSiblings(e).and(getNoteBooks()),
-  R.path(['meta', 'notebook'])
+  R.path(['nbook', 'uuid'])
 )
 
 const processNote = (buf, enc, next) => {
@@ -55,7 +49,7 @@ const processNote = (buf, enc, next) => {
     r =>
       r.run().listen({
         onResolved: r => {
-          next()
+          // next()
           return createNotePage(r)
         }
       }),
@@ -70,15 +64,15 @@ const end = r => next => {
   next()
 }
 
-const runme = () =>
-  task(r =>
+const runme = () => {
+  return task(r =>
     db
       .createValueStream({
-        valueAsBuffer: false,
         gt: 'note:',
         lt: 'note:~'
       })
-      .pipe(through.obj({ objectMode: true }, processNote, end(r)))
-  )
+      .on('data', d => processNote(JSON.parse(d)))
+      .on('end', t => r.resolve('no more notes'))
+  )}
 
 module.exports = runme

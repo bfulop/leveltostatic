@@ -15,10 +15,13 @@ const createNoteHTML = R.ap(
   )
 )
 
-const urlify = R.compose(R.replace(/\W/g, '-'), r => cleanSpecialChars(r, {'&': 'and'}))
+const urlify = R.compose(
+  R.replace(/\W/g, '-'),
+  r => cleanSpecialChars(r, { '&': 'and' })
+)
 
-const tiltelens = R.lensPath(['notedata', 'note', 'meta', 'title'])
-const notebooklens = R.lensPath(['notedata', 'nbook', 'name'])
+const notebooklens = R.lensPath(['notedata', 'note', 'meta', 'title'])
+const tiltelens = R.lensPath(['notedata', 'nbook', 'name'])
 
 const createFilePath = R.compose(
   R.objOf('path'),
@@ -31,11 +34,12 @@ const createFilePath = R.compose(
   R.over(notebooklens, urlify),
   R.over(tiltelens, urlify)
 )
+const createPath = R.ap(R.mergeDeepLeft, createFilePath)
 
 const createPage = R.compose(
   writeFile,
   createNoteHTML,
-  createFilePath
+  createPath
 )
 
 module.exports = createPage

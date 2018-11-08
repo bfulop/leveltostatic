@@ -1,6 +1,6 @@
 const fs = require('fs-extra')
 const path = require('path')
-const { task, fromPromised } = require('folktale/concurrency/task')
+const { task, fromPromised, of } = require('folktale/concurrency/task')
 
 function readFile(filename) {
   return task(resolver =>
@@ -25,6 +25,7 @@ function readDir(dirpath) {
 }
 
 const writeFileToDisk = (filepath, contents) => {
+  console.log('writeFileToDisk', filepath)
   return task(resolver => {
     fr.writeFile(filepath, contents, 'utf8', err => {
       if (err) {
@@ -38,7 +39,8 @@ const writeFileToDisk = (filepath, contents) => {
 
 const ensureFileT = fromPromised(fs.ensureFile)
 
-const writeFile = ({ filepath, contents }) =>
-  ensureFileT(filepath).chain(() => writeFileToDisk(filepath, contents))
-
+const writeFile = ({ filepath, contents }) => {
+  return of('done')
+  // return ensureFileT(filepath).chain(() => writeFileToDisk(filepath, contents))
+}
 module.exports = { readFile, readDir, writeFile }
