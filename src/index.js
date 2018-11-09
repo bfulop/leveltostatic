@@ -3,7 +3,9 @@ const R = require('ramda')
 const db = require('./getdb')
 const to = require('to2')
 const through = require('through2')
+const { getNoteBooks } = require('./listNoteBooks')
 const createNotePage = require('./createNotePage')
+const createIndex = require('./createIndex')
 
 const logger = r => {
   console.log('r')
@@ -25,19 +27,6 @@ const getSiblings = nbookid => {
       .on('end', () => r.resolve(notes))
   )
 }
-const getNoteBooks = () => {
-  let notebooks = []
-  return task(r =>
-    db
-      .createValueStream({
-        gt: 'notebooks:',
-        lt: 'notebooks:~'
-      })
-      .on('data', d => notebooks.push(JSON.parse(d)))
-      .on('end', () => r.resolve(notebooks))
-  )
-}
-const listNoteBooks = R.memoizeWith(R.identity, getNoteBooks)
 
 const collectParents = R.compose(
   e => getSiblings(e).and(getNoteBooks()),
@@ -73,6 +62,8 @@ const runme = () => {
       })
       .on('data', d => processNote(JSON.parse(d)))
       .on('end', t => r.resolve('no more notes'))
-  )}
+  )
+  .chain(() => createIndex)
+}
 
 module.exports = runme

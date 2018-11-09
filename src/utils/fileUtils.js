@@ -25,21 +25,23 @@ function readDir(dirpath) {
   )
 }
 
-const writeFileToDisk = (filepath, contents) => task(r => {
-  fs.outputFile(filepath, contents)
-  .then(r.resolve)
-  .catch(r.reject)
-})
+const writeFileToDisk = (filepath, contents) =>
+  task(r => {
+    fs.outputFile(filepath, contents)
+      .then(r.resolve)
+      .catch(r.reject)
+  })
 
-const ensureDirT = p => task(r => {
-  fs.ensureDir(p)
-  .then(r.resolve)
-  .catch(r.reject)
-})
+const ensureDirT = p =>
+  task(r => {
+    fs.ensureDir(p)
+      .then(r.resolve)
+      .catch(r.reject)
+  })
 
-const writeFile = ({ path, html }) => {
-  debugger;
-  // return of('done')
-  return ensureDirT(R.replace(/(\w|-)+\.html/g, '', path)).chain(() => writeFileToDisk(path, html))
-}
+const writeFile = ({ path, html }) =>
+  ensureDirT(R.replace(/(\w|-)+\.html/g, '', path)).chain(() =>
+    writeFileToDisk(path, html)
+  )
+
 module.exports = { readFile, readDir, writeFile }
