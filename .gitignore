@@ -2,3 +2,5 @@ node_modules
 *.vim
 testdb
 quiverdb
+dist
+.DS_Store

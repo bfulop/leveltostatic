@@ -50,7 +50,7 @@ const processNote = (buf, enc, next) => {
       r.run().listen({
         onResolved: r => {
           // next()
-          return createNotePage(r)
+          return createNotePage(r).run()
         }
       }),
     R.map(R.zipObj(['siblings', 'notebooks', 'notedata'])),

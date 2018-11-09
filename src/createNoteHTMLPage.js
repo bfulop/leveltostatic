@@ -37,7 +37,6 @@ const createFilePath = R.compose(
 const createPath = R.ap(R.mergeDeepLeft, createFilePath)
 
 const createPage = R.compose(
-  writeFile,
   createNoteHTML,
   createPath
 )

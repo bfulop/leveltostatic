@@ -1,3 +1,4 @@
+const R = require('ramda')
 const fs = require('fs-extra')
 const path = require('path')
 const { task, fromPromised, of } = require('folktale/concurrency/task')
@@ -24,23 +25,21 @@ function readDir(dirpath) {
   )
 }
 
-const writeFileToDisk = (filepath, contents) => {
-  console.log('writeFileToDisk', filepath)
-  return task(resolver => {
-    fr.writeFile(filepath, contents, 'utf8', err => {
-      if (err) {
-        resolver.reject('file not saved!')
-        return
-      }
-      resolver.resolve(filepath + ' written')
-    })
-  })
-}
+const writeFileToDisk = (filepath, contents) => task(r => {
+  fs.outputFile(filepath, contents)
+  .then(r.resolve)
+  .catch(r.reject)
+})
 
-const ensureFileT = fromPromised(fs.ensureFile)
+const ensureDirT = p => task(r => {
+  fs.ensureDir(p)
+  .then(r.resolve)
+  .catch(r.reject)
+})
 
-const writeFile = ({ filepath, contents }) => {
-  return of('done')
-  // return ensureFileT(filepath).chain(() => writeFileToDisk(filepath, contents))
+const writeFile = ({ path, html }) => {
+  debugger;
+  // return of('done')
+  return ensureDirT(R.replace(/(\w|-)+\.html/g, '', path)).chain(() => writeFileToDisk(path, html))
 }
 module.exports = { readFile, readDir, writeFile }
