@@ -9,7 +9,8 @@
   "scripts": {
     "main": "node src/run",
     "test": "jest --env node",
-    "test:watch": "jest --watch --env node"
+    "test:watch": "jest --watch --env node",
+    "now-build": "node src/run -d dist"
   },
   "repository": {
     "type": "git",
