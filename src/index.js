@@ -57,8 +57,8 @@ const runme = () => {
   return task(r =>
     db
       .createValueStream({
-        gt: 'note:',
-        lt: 'note:~'
+        gt: 'anote:',
+        lt: 'anote:~'
       })
       .on('data', d => processNote(JSON.parse(d)))
       .on('end', t => r.resolve('no more notes'))
