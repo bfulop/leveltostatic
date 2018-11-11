@@ -1,54 +1,126 @@
+const R = require('ramda')
 const { of } = require('folktale/concurrency/task')
 const levelup = require('levelup')
 const memdown = require('memdown')
+const encode = require('encoding-down')
 
-const db = levelup(memdown())
+jest.mock('./createIndex')
+const createIndex = require('./createIndex')
+createIndex.mockImplementation(() => {
+  console.log('mocking createIndex')
+  return of('just done it')
+})
+
+const db = levelup(memdown(), { valueEncoding: 'json' })
 
 jest.mock('./getdb')
 const getDB = require('./getdb')
-getDB.mockReturnValue(db)
+getDB.mockImplementation(() => db)
 
 jest.mock('./createNotePage')
 const createNotePage = require('./createNotePage')
 createNotePage.mockReturnValue(of('pagecreated'))
 
-const subject = require('./index')
+jest.mock('./listNoteBooks')
+const { getNoteBooks } = require('./listNoteBooks')
+getNoteBooks.mockReturnValue(of(['notebook aa', 'notebook ba']))
 
 describe('walking through the db', () => {
   beforeAll(done => {
-    db.batch()
-      .put('note:aaa1', { meta: { notebook: 'aa' }, content: 'note_aaa1_data' })
-      .put('note:aaa2', { meta: { notebook: 'aa' }, content: 'note_aaa2_data' })
-      .put('note:aaa3', { meta: { notebook: 'aa' }, content: 'note_aaa3_data' })
-      .put('note:baa1', { meta: { notebook: 'aa' }, content: 'note_baa1_data' })
-      .put('note:baa2', { meta: { notebook: 'aa' }, content: 'note_baa2_data' })
-      .put('note:baa3', { meta: { notebook: 'aa' }, content: 'note_baa3_data' })
-      .put('anotebook:aa:100:aaa1', 'note aaa1')
-      .put('anotebook:aa:101:aaa2', 'note aaa2')
-      .put('anotebook:aa:102:aaa3', 'note aaa3')
-      .put('anotebook:ba:103:baa1', 'note baa1')
-      .put('anotebook:ba:104:baa2', 'note baa2')
-      .put('anotebook:ba:105:baa3', 'note baa3')
-      .put('notebooks:100:aa', 'notebook aa')
-      .put('notebooks:103:ba', 'notebook ba')
-      .write(() => {
-        done()
-      })
+    const valueLens = R.lensProp('value')
+    const jsonify = R.map(r =>
+      R.set(valueLens)(
+        R.compose(
+          v => JSON.stringify(v),
+          R.view(valueLens)
+        )(r)
+      )(r)
+    )
+
+    const basedata = [
+      {
+        type: 'put',
+        key: 'anote:aaa1',
+        value: {  nbook: { uuid: 'aa' }, content: 'note_aaa1_data' }
+      },
+      {
+        type: 'put',
+        key: 'anote:aaa2',
+        value: { nbook: { uuid: 'aa' }, content: 'note_aaa2_data' }
+      },
+      {
+        type: 'put',
+        key: 'anote:aaa3',
+        value: { nbook: { uuid: 'aa' }, content: 'note_aaa3_data' }
+      },
+      {
+        type: 'put',
+        key: 'anote:baa1',
+        value: { nbook: { uuid: 'aa' }, content: 'note_baa1_data' }
+      },
+      {
+        type: 'put',
+        key: 'anote:baa2',
+        value: { nbook: { uuid: 'aa' }, content: 'note_baa2_data' }
+      },
+      {
+        type: 'put',
+        key: 'anote:baa3',
+        value: { nbook: { uuid: 'aa' }, content: 'note_baa3_data' }
+      },
+      {
+        type: 'put',
+        key: 'anotebook:aa:100:aaa1',
+        value: { title: 'note aaa1' }
+      },
+      {
+        type: 'put',
+        key: 'anotebook:aa:101:aaa2',
+        value: { title: 'note aaa2' }
+      },
+      {
+        type: 'put',
+        key: 'anotebook:aa:102:aaa3',
+        value: { title: 'note aaa3' }
+      },
+      {
+        type: 'put',
+        key: 'anotebook:ba:103:baa1',
+        value: { title: 'note baa1' }
+      },
+      {
+        type: 'put',
+        key: 'anotebook:ba:104:baa2',
+        value: { title: 'note baa2' }
+      },
+      {
+        type: 'put',
+        key: 'anotebook:ba:105:baa3',
+        value: { title: 'note baa3' }
+      },
+      { type: 'put', key: 'notebooks:100:aa', value: { title: 'notebook aa' } },
+      { type: 'put', key: 'notebooks:103:ba', value: { title: 'notebook ba' } }
+    ]
+    db.batch(jsonify(basedata), () => {
+      console.log('db seeded done')
+      done()
+    })
   })
   test('running subject', done => {
+    const subject = require('./index')
     subject()
       .run()
       .listen({
         onResolved: t => {
-          expect(t).toEqual('end')
+          expect(t).toEqual('just done it')
           done()
         }
       })
   })
   test('calls a createNotePage', done => {
     expect(createNotePage.mock.calls[0][0]).toEqual({
-      notedata: { meta: { notebook: 'aa' }, content: 'note_aaa1_data' },
-      siblings: ['note aaa1', 'note aaa2', 'note aaa3'],
+      notedata: { nbook: { uuid: 'aa' }, content: 'note_aaa1_data' },
+      siblings: [{title: 'note aaa1'}, {title: 'note aaa2'}, {title: 'note aaa3'}],
       notebooks: ['notebook aa', 'notebook ba']
     })
     done()

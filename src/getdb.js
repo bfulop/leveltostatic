@@ -1,5 +1,8 @@
 const level = require('level')
 
-// const createDB = () => level('./testdb')
-
-module.exports = level('./quiverdb')
+const createDB = () => {
+  console.log('**************')
+  console.log('requesting db')
+  return level('./testdb')
+}
+module.exports = createDB

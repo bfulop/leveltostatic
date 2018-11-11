@@ -3,7 +3,7 @@ const { of } = require('folktale/concurrency/task')
 jest.mock('./utils/fileUtils').writeFile
 const writeFile = require('./utils/fileUtils').writeFile
 writeFile.mockImplementation(n => {
-  if(n === 'pants-HTML') {
+  if (n === 'pants-HTML') {
     return of('pants-success')
   }
 })
@@ -24,4 +24,5 @@ describe('generating the HTML and saving it', () => {
         }
       })
   })
+
 })

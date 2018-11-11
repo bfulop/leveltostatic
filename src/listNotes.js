@@ -15,4 +15,8 @@ const latestNotes = limit => {
   )
 }
 
-module.exports = { latestNotes }
+const notebookNotes = nbookid => {
+  return 'not yet implemented'
+}
+
+module.exports = { latestNotes, notebookNotes }
