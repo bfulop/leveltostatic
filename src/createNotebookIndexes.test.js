@@ -19,7 +19,7 @@ writeFile.mockReturnValue(of('nbook1_note1 written successfully'))
 
 const subject = require('./createNotebookIndexes')
 
-describe.skip('getting list of notebooks and saving an index file', () => {
+describe('getting list of notebooks and saving an index file', () => {
   beforeAll(done => {
     subject()
       .run()
@@ -30,7 +30,7 @@ describe.skip('getting list of notebooks and saving an index file', () => {
         }
       })
   })
-  test('calls writefile with merged data', done => {
+  test('calls writefile with merged data', () => {
     expect(createHTML.mock.calls[0][0]).toEqual({
       notebook: 'nbook1',
       notes: ['nbook1_note1', 'nbook1_note2', 'nbook1_note3']

@@ -41,7 +41,7 @@ describe('walking through the db', () => {
       {
         type: 'put',
         key: 'anote:aaa1',
-        value: {  nbook: { uuid: 'aa' }, content: 'note_aaa1_data' }
+        value: { nbook: { uuid: 'aa' }, content: 'note_aaa1_data' }
       },
       {
         type: 'put',
@@ -101,10 +101,7 @@ describe('walking through the db', () => {
       { type: 'put', key: 'notebooks:100:aa', value: { title: 'notebook aa' } },
       { type: 'put', key: 'notebooks:103:ba', value: { title: 'notebook ba' } }
     ]
-    db.batch(jsonify(basedata), () => {
-      console.log('db seeded done')
-      done()
-    })
+    db.batch(jsonify(basedata), done)
   })
   test('running subject', done => {
     const subject = require('./index')
@@ -120,7 +117,11 @@ describe('walking through the db', () => {
   test('calls a createNotePage', done => {
     expect(createNotePage.mock.calls[0][0]).toEqual({
       notedata: { nbook: { uuid: 'aa' }, content: 'note_aaa1_data' },
-      siblings: [{title: 'note aaa1'}, {title: 'note aaa2'}, {title: 'note aaa3'}],
+      siblings: [
+        { title: 'note aaa1' },
+        { title: 'note aaa2' },
+        { title: 'note aaa3' }
+      ],
       notebooks: ['notebook aa', 'notebook ba']
     })
     done()
