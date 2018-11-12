@@ -98,8 +98,8 @@ describe('walking through the db', () => {
         key: 'anotebook:ba:105:baa3',
         value: { title: 'note baa3' }
       },
-      { type: 'put', key: 'notebooks:100:aa', value: { title: 'notebook aa' } },
-      { type: 'put', key: 'notebooks:103:ba', value: { title: 'notebook ba' } }
+      { type: 'put', key: 'notebooks:100:aa', value: { name: 'notebook aa' } },
+      { type: 'put', key: 'notebooks:103:ba', value: { name: 'notebook ba' } }
     ]
     db.batch(jsonify(basedata), done)
   })

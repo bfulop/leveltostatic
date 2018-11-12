@@ -2,7 +2,10 @@ const { of } = require('folktale/concurrency/task')
 
 jest.mock('./listNoteBooks')
 const { getNoteBooks } = require('./listNoteBooks')
-getNoteBooks.mockReturnValue(of(['nbook1', 'nbook2', 'nbook3']))
+getNoteBooks.mockReturnValue(
+  of([{ name: 'nbook1' }, { name: 'nbook2' }, { name: 'nbook3' }])
+)
+
 jest.mock('./listNotes')
 const { notebookNotes } = require('./listNotes')
 notebookNotes.mockReturnValue(
@@ -13,9 +16,10 @@ jest.mock('./generateNotebookIndexHTML')
 const createHTML = require('./generateNotebookIndexHTML')
 createHTML.mockReturnValue('indexHTML')
 
-jest.mock('./utils/fileUtils').writeFile
-const writeFile = require('./utils/fileUtils').writeFile
+jest.mock('./utils/fileUtils')
+const { writeFile, createCleanPath } = require('./utils/fileUtils')
 writeFile.mockReturnValue(of('nbook1_note1 written successfully'))
+createCleanPath.mockReturnValue('cleanpath')
 
 const subject = require('./createNotebookIndexes')
 
@@ -30,10 +34,23 @@ describe('getting list of notebooks and saving an index file', () => {
         }
       })
   })
+  test('calls createHTML with merged data', () => {
+    expect(createHTML).toBeCalledWith(
+      expect.objectContaining({
+        notebook: { name: 'nbook1' },
+        notes: ['nbook1_note1', 'nbook1_note2', 'nbook1_note3']
+      })
+    )
+  })
+  test('calls createCleanPath with notebooks name', () => {
+    expect(createCleanPath).toBeCalledWith('nbook1')
+  })
   test('calls writefile with merged data', () => {
-    expect(createHTML.mock.calls[0][0]).toEqual({
-      notebook: 'nbook1',
-      notes: ['nbook1_note1', 'nbook1_note2', 'nbook1_note3']
-    })
+    expect(writeFile).toBeCalledWith(
+      expect.objectContaining({
+        path: 'cleanpath',
+        html: 'indexHTML'
+      })
+    )
   })
 })

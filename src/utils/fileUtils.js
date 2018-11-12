@@ -44,4 +44,6 @@ const writeFile = ({ path, html }) =>
     writeFileToDisk(path, html)
   )
 
-module.exports = { readFile, readDir, writeFile }
+const createCleanPath = s => 'cleanpath'
+
+module.exports = { readFile, readDir, writeFile, createCleanPath }
