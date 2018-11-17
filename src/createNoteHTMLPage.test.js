@@ -31,9 +31,15 @@ describe('creates path and content for writeFile', () => {
     done()
   })
   test('creates the correct path', () => {
-    expect(writeFile.mock.calls[0][0]).toMatchObject({ path: './dist/exercise-adding-webpack/a-long-and-name-eu.html' })
+    expect(writeFile).toBeCalledWith(
+      expect.objectContaining({
+        path: './dist/a-long-and-name-eu/exercise-adding-webpack.html'
+      })
+    )
   })
   test('adds the HTML', () => {
-    expect(writeFile.mock.calls[0][0]).toMatchObject({ html: 'html content' })
+    expect(writeFile).toBeCalledWith(
+      expect.objectContaining({ html: 'html content' })
+    )
   })
 })

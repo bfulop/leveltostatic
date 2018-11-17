@@ -17,14 +17,14 @@ const createpathprop = r => R.assoc('path', R.__, r)
 const addHTML = R.ap(createhtmlprop, createHTML)
 const addPath = R.ap(createpathprop, R.compose(createCleanPath, R.view(R.lensPath(['notebook', 'name']))))
 
-const addFileProps = R.compose(addHTML, addPath)
+const createHTMLandPath = R.compose(addHTML, addPath)
 
 const createIndex = () =>
   getNoteBooks()
     .map(R.map(mergeNotesList))
     .chain(waitAll)
     .map(R.map(splitToObj))
-    .map(R.map(addFileProps))
+    .map(R.map(createHTMLandPath))
     .map(R.map(writeFile))
     .chain(waitAll)
 
