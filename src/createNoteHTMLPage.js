@@ -19,7 +19,7 @@ const tiltelens = R.lensPath(['notedata', 'nbook', 'name'])
 
 const createFilePath = R.compose(
   R.objOf('path'),
-  R.concat('../../dist/'),
+  R.concat('../dist/'),
   R.concat(R.__, '.html'),
   R.replace(/-$/g, ''),
   R.replace(/-{2,}/g, '-'),

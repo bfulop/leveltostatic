@@ -11,7 +11,7 @@ const createIndex = () => getNoteBooks()
   .map(r => createHTML(r))
   .map(
     R.compose(
-      R.assoc('path', '../../dist/index.html'),
+      R.assoc('path', '../dist/index.html'),
       R.objOf('html')
     )
   )
