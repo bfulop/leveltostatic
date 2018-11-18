@@ -2,7 +2,7 @@ const R = require('ramda')
 const { List } = require('immutable-ext')
 const { of, waitAll } = require('folktale/concurrency/task')
 const { getNoteBooks } = require('./listNoteBooks')
-const createHTML = require('./generateNotebookIndexHTML')
+const createHTML = require('../../templates/generateNotebookIndexHTML')
 const { writeFile, createCleanPath } = require('./utils/fileUtils')
 const { notebookNotes } = require('./listNotes')
 

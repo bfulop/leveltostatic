@@ -1,7 +1,7 @@
 const R = require('ramda')
 const { of } = require('folktale/concurrency/task')
 const { getNoteBooks } = require('./listNoteBooks')
-const createHTML = require('./generateIndexHTML')
+const createHTML = require('../../templates/generateIndexHTML')
 const { writeFile } = require('./utils/fileUtils')
 const { latestNotes } = require('./listNotes')
 

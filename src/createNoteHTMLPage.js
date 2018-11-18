@@ -1,5 +1,5 @@
 const R = require('ramda')
-const generateNoteHTML = require('./generateNoteHTML')
+const generateNoteHTML = require('../../templates/generateNoteHTML')
 const { createCleanPath } = require('./utils/fileUtils')
 
 const logger = r => {
