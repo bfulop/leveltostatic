@@ -21,7 +21,7 @@ const createhtmlprop = r => R.assoc('html', R.__, r)
 const createpathprop = r => R.assoc('path', R.__, r)
 
 const addHTML = R.ap(createhtmlprop, createHTML)
-const addPath = R.ap(createpathprop, R.compose(R.concat(R.__, '/index.html'), R.concat('./dist/'), createCleanPath, R.view(R.lensPath(['notebook', 'name']))))
+const addPath = R.ap(createpathprop, R.compose(R.concat(R.__, '/index.html'), R.concat('../../dist/'), createCleanPath, R.view(R.lensPath(['notebook', 'name']))))
 
 const createHTMLandPath = R.compose(addHTML, addPath)
 
