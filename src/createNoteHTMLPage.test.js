@@ -20,12 +20,8 @@ jest.mock('./generateNoteHTML')
 const generateNoteHTML = require('./generateNoteHTML')
 generateNoteHTML.mockReturnValue('html content')
 
-jest.mock('./utils/fileUtils')
-const { writeFile } = require('./utils/fileUtils')
-writeFile.mockReturnValue('file written')
-
 const subject = require('./createNoteHTMLPage')
-describe('creates path and content for writeFile', () => {
+describe('creates path and content', () => {
   beforeAll(done => {
     subject(notedata)
     done()

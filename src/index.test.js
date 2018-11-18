@@ -4,6 +4,10 @@ const levelup = require('levelup')
 const memdown = require('memdown')
 const encode = require('encoding-down')
 
+jest.mock('./createNotebookIndexes')
+const {createNotebookIndex} = require('./createNotebookIndexes')
+createNotebookIndex.mockReturnValue(of('index created'))
+
 jest.mock('./createIndex')
 const createIndex = require('./createIndex')
 createIndex.mockImplementation(() => {

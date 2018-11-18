@@ -65,7 +65,7 @@ const runme = () => {
       .on('end', () => r.resolve('no more notes'))
   )
   .chain(createNotebookIndex)
-  // .chain(createIndex)
+  .chain(createIndex)
 }
 
 module.exports = runme
