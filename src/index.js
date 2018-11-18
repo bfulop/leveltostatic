@@ -6,14 +6,13 @@ const through = require('through2')
 const { getNoteBooks } = require('./listNoteBooks')
 const createNotePage = require('./createNotePage')
 const createIndex = require('./createIndex')
+const {createNotebookIndex} = require('./createNotebookIndexes')
 
 const logger = r => {
   console.log('r')
   console.log(r)
   return r
 }
-
-const siblingNotes = nbookid => of(['aaa1', 'aaa2', 'aaa3'])
 
 const getSiblings = nbookid => {
   let notes = []
@@ -62,10 +61,11 @@ const runme = () => {
         gt: 'anote:',
         lt: 'anote:~'
       })
-      .on('data', d => processNote(JSON.parse(d)))
+      .on('data', R.compose(processNote,JSON.parse))
       .on('end', () => r.resolve('no more notes'))
   )
-  .chain(() => createIndex())
+  .chain(createNotebookIndex)
+  // .chain(createIndex)
 }
 
 module.exports = runme

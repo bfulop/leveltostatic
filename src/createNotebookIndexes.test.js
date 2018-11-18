@@ -21,11 +21,24 @@ const { writeFile, createCleanPath } = require('./utils/fileUtils')
 writeFile.mockReturnValue(of('nbook1_note1 written successfully'))
 createCleanPath.mockReturnValue('cleanpath')
 
-const subject = require('./createNotebookIndexes')
+const {createNotebookIndex, mergeNotesList} = require('./createNotebookIndexes')
+
+describe('mergeNotesList', () => {
+  test('merges the data', done => {
+    mergeNotesList({ name: 'nbook1' })
+      .run()
+      .listen({
+        onResolved: t => {
+          expect(t).toEqual([{name: 'nbook1'}, 'nbook1_note1', 'nbook1_note2', 'nbook1_note3'])
+          done()
+        }
+      })
+  })
+})
 
 describe('getting list of notebooks and saving an index file', () => {
   beforeAll(done => {
-    subject()
+    createNotebookIndex()
       .run()
       .listen({
         onResolved: t => {

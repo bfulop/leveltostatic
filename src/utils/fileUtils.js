@@ -2,6 +2,7 @@ const R = require('ramda')
 const fs = require('fs-extra')
 const path = require('path')
 const { task, fromPromised, of } = require('folktale/concurrency/task')
+const cleanSpecialChars = require('clean-special-chars')
 
 function readFile(filename) {
   return task(resolver =>
@@ -44,6 +45,9 @@ const writeFile = ({ path, html }) =>
     writeFileToDisk(path, html)
   )
 
-const createCleanPath = s => 'cleanpath'
+const createCleanPath = R.compose(
+  R.replace(/\W/g, '-'),
+  r => cleanSpecialChars(r, { '&': 'and' })
+)
 
 module.exports = { readFile, readDir, writeFile, createCleanPath }

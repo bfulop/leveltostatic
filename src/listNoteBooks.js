@@ -1,5 +1,11 @@
 const { task } = require('folktale/concurrency/task')
-const db = require('./getdb')
+const db = require('./getdb')()
+
+const logger = r => {
+  console.log('r')
+  console.log(r)
+  return r
+}
 
 const getNoteBooks = () => {
   let notebooks = []

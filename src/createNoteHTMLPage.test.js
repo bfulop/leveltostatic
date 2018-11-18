@@ -31,15 +31,9 @@ describe('creates path and content for writeFile', () => {
     done()
   })
   test('creates the correct path', () => {
-    expect(writeFile).toBeCalledWith(
-      expect.objectContaining({
-        path: './dist/a-long-and-name-eu/exercise-adding-webpack.html'
-      })
-    )
-  })
-  test('adds the HTML', () => {
-    expect(writeFile).toBeCalledWith(
-      expect.objectContaining({ html: 'html content' })
-    )
+    expect(subject(notedata)).toMatchObject({
+      path: './dist/a-long-and-name-eu/exercise-adding-webpack.html',
+      html: 'html content'
+    })
   })
 })

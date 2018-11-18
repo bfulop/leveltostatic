@@ -1,7 +1,6 @@
 const R = require('ramda')
 const generateNoteHTML = require('./generateNoteHTML')
-const { writeFile } = require('./utils/fileUtils')
-const cleanSpecialChars = require('clean-special-chars')
+const { createCleanPath } = require('./utils/fileUtils')
 
 const logger = r => {
   console.log('r', r)
@@ -15,11 +14,6 @@ const createNoteHTML = R.ap(
   )
 )
 
-const urlify = R.compose(
-  R.replace(/\W/g, '-'),
-  r => cleanSpecialChars(r, { '&': 'and' })
-)
-
 const notebooklens = R.lensPath(['notedata', 'note', 'meta', 'title'])
 const tiltelens = R.lensPath(['notedata', 'nbook', 'name'])
 
@@ -31,13 +25,12 @@ const createFilePath = R.compose(
   R.replace(/-{2,}/g, '-'),
   r => R.concat(R.view(tiltelens, r), R.view(notebooklens, r)),
   R.over(notebooklens, R.concat('/')),
-  R.over(notebooklens, urlify),
-  R.over(tiltelens, urlify)
+  R.over(notebooklens, createCleanPath),
+  R.over(tiltelens, createCleanPath)
 )
 const createPath = R.ap(R.mergeDeepLeft, createFilePath)
 
 const createPage = R.compose(
-  writeFile,
   createNoteHTML,
   createPath
 )
