@@ -12,8 +12,8 @@ notebookNotes.mockReturnValue(
   of(['nbook1_note1', 'nbook1_note2', 'nbook1_note3'])
 )
 
-jest.mock('./generateNotebookIndexHTML')
-const createHTML = require('./generateNotebookIndexHTML')
+jest.mock('../../templates/generateNotebookIndexHTML')
+const createHTML = require('../../templates/generateNotebookIndexHTML')
 createHTML.mockReturnValue('indexHTML')
 
 jest.mock('./utils/fileUtils')
@@ -51,7 +51,8 @@ describe('getting list of notebooks and saving an index file', () => {
     expect(createHTML).toBeCalledWith(
       expect.objectContaining({
         notebook: { name: 'nbook1' },
-        notes: ['nbook1_note1', 'nbook1_note2', 'nbook1_note3']
+        notes: ['nbook1_note1', 'nbook1_note2', 'nbook1_note3'],
+        // notebooks: [{ name: 'nbook1' }, { name: 'nbook2' }, { name: 'nbook3' }]
       })
     )
   })
@@ -61,7 +62,7 @@ describe('getting list of notebooks and saving an index file', () => {
   test('calls writefile with merged data', () => {
     expect(writeFile).toBeCalledWith(
       expect.objectContaining({
-        path: './dist/cleanpath/index.html',
+        path: '../dist/cleanpath/index.html',
         html: 'indexHTML'
       })
     )
