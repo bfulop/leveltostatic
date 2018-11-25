@@ -46,6 +46,7 @@ const writeFile = ({ path, html }) =>
   )
 
 const createCleanPath = R.compose(
+  R.replace(/-{2,}/g, '-'),
   R.replace(/\W/g, '-'),
   r => cleanSpecialChars(r, { '&': 'and' })
 )
