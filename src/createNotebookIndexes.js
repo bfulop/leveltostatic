@@ -63,7 +63,10 @@ const createNotebookIndex = () =>
     .map(
       R.map(
         R.ap(
-          R.compose(R.assoc('notebooks'), R.path(['notebook', 'notebooks'])),
+          R.compose(
+            R.assoc('notebooks'),
+            R.path(['notebook', 'notebooks'])
+          ),
           R.identity
         )
       )

@@ -1,23 +1,28 @@
 const R = require('ramda')
-const { task } = require('folktale/concurrency/task')
+const { task, waitAll } = require('folktale/concurrency/task')
 const db = require('./getdb')()
+
+const getNote = id => task(r => db.get(R.concat('anote:')(id)).then(r.resolve))
+
+const getNoteId = R.compose(R.last, R.split(':'))
 
 const latestNotes = limit => {
   let notes = []
   return task(r =>
     db
-      .createValueStream({
+      .createKeyStream({
         gt: 'notes:',
         let: 'notes:~',
         limit: limit
       })
-      .on('data', d => notes.push(JSON.parse(d)))
+      .on('data', d => notes.push(getNoteId(d)))
       .on('end', () => r.resolve(notes))
   )
+    .map(R.map(getNote))
+    .chain(waitAll)
 }
 const notebookNotes = nbookid => {
   let notes = []
-  console.log('annotebooks-------')
   return task(r =>
     db
       .createValueStream({
@@ -25,10 +30,7 @@ const notebookNotes = nbookid => {
         lt: 'anotebook:' + nbookid + ':~'
       })
       .on('data', d => notes.push(JSON.parse(d)))
-      .on('end', () => {
-        console.log('--------------------------------', nbookid)
-        console.log(notes)
-        return r.resolve(notes)})
+      .on('end', () => r.resolve(notes))
   )
 }
 
