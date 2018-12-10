@@ -13,7 +13,8 @@ const latestNotes = limit => {
       .createKeyStream({
         gt: 'notes:',
         let: 'notes:~',
-        limit: limit
+        limit: limit,
+        reverse: true
       })
       .on('data', d => notes.push(getNoteId(d)))
       .on('end', () => r.resolve(notes))
