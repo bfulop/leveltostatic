@@ -6,6 +6,7 @@ const through = require('through2')
 const { getNoteBooks } = require('./listNoteBooks')
 const createNotePage = require('./createNotePage')
 const createIndex = require('./createIndex')
+const createAbout = require('./createAbout')
 const {createNotebookIndex} = require('./createNotebookIndexes')
 
 const logger = r => {
@@ -66,6 +67,7 @@ const runme = () => {
   )
   .chain(createNotebookIndex)
   .chain(createIndex)
+  .chain(createAbout)
 }
 
 module.exports = runme
