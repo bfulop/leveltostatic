@@ -5,7 +5,7 @@ const { writeFile } = require('./utils/fileUtils')
 
 const createAbout = () =>
   of(R.objOf('html', createHTML()))
-    .map(R.assoc('paht', '../dist/about.html'))
+    .map(R.assoc('path', '../dist/about.html'))
     .chain(writeFile)
 
 module.exports = createAbout
