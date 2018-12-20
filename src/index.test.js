@@ -5,15 +5,16 @@ const memdown = require('memdown')
 const encode = require('encoding-down')
 
 jest.mock('./createNotebookIndexes')
-const {createNotebookIndex} = require('./createNotebookIndexes')
+const { createNotebookIndex } = require('./createNotebookIndexes')
 createNotebookIndex.mockReturnValue(of('index created'))
 
 jest.mock('./createIndex')
 const createIndex = require('./createIndex')
-createIndex.mockImplementation(() => {
-  console.log('mocking createIndex')
-  return of('just done it')
-})
+createIndex.mockImplementation(() => of('just done it'))
+
+jest.mock('./createAbout')
+const createAbout = require('./createAbout')
+createAbout.mockImplementation(() => of('just done it'))
 
 const db = levelup(memdown(), { valueEncoding: 'json' })
 
