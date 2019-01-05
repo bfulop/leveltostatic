@@ -1,13 +1,17 @@
 const R = require('ramda')
-const { of } = require('folktale/concurrency/task')
+const { of, waitAll } = require('folktale/concurrency/task')
 const { getNoteBooks } = require('./listNoteBooks')
 const createHTML = require('../../templates/generateIndexHTML')
 const { writeFile } = require('./utils/fileUtils')
 const { latestNotes } = require('./listNotes')
+const { getOrderedTags } = require('./summariseTags')
 
-const createIndex = () => getNoteBooks()
-  .and(latestNotes(10))
-  .map(R.zipObj(['notebooks', 'latestnotes']))
+const createIndex = () => waitAll([
+  getNoteBooks(),
+  latestNotes(10),
+  getOrderedTags()
+])
+  .map(R.zipObj(['notebooks', 'latestnotes', 'tags']))
   .map(r => createHTML(r))
   .map(
     R.compose(

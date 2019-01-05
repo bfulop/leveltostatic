@@ -7,8 +7,6 @@ const orderTags = R.sortWith([
   R.descend(R.prop('size'))
 ])
 
-const getSummariseTags = orderTags
-
 const getAllTags = () =>
   task(r => {
     let tagxs = []
@@ -20,13 +18,6 @@ const getAllTags = () =>
       .on('end', t => r.resolve(tagxs))
   })
 
-const calcRelations = () =>
-  getAllTags()
-    .chain(processRelations)
-    .map(r =>
-      db().batch(r, () => {
-        console.log('tags updated')
-        return true
-      })
-    )
-module.exports = { getSummariseTags, orderTags }
+const getOrderedTags = () => getAllTags().chain(orderTags)
+
+module.exports = { getOrderedTags, orderTags }
