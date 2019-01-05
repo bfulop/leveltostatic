@@ -34,6 +34,7 @@ const collectParents = R.compose(
 )
 
 const processNote = (buf, enc, next) => {
+  console.log('processNote')
   return R.compose(
     r =>
       r.run().listen({
@@ -44,7 +45,8 @@ const processNote = (buf, enc, next) => {
       }),
     R.map(R.zipObj(['siblings', 'notebooks', 'notedata'])),
     R.map(R.append(buf)),
-    collectParents
+    collectParents,
+    logger
   )(buf)
 }
 
@@ -62,7 +64,7 @@ const runme = () => {
         gt: 'anote:',
         lt: 'anote:~'
       })
-      .on('data', R.compose(processNote,JSON.parse))
+      .on('data', R.compose(processNote,JSON.parse, logger))
       .on('end', () => r.resolve('no more notes'))
   )
   .chain(createNotebookIndex)
