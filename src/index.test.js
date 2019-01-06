@@ -33,14 +33,7 @@ getNoteBooks.mockReturnValue(of(['notebook aa', 'notebook ba']))
 describe('walking through the db', () => {
   beforeAll(done => {
     const valueLens = R.lensProp('value')
-    const jsonify = R.map(r =>
-      R.set(valueLens)(
-        R.compose(
-          v => JSON.stringify(v),
-          R.view(valueLens)
-        )(r)
-      )(r)
-    )
+    const jsonify = R.map(r => r)
 
     const basedata = [
       {

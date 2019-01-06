@@ -1,13 +1,13 @@
 const { task, of } = require('folktale/concurrency/task')
 const R = require('ramda')
-const db = require('./getdb')()
+const db = require('./getdb')
 const to = require('to2')
 const through = require('through2')
 const { getNoteBooks } = require('./listNoteBooks')
 const createNotePage = require('./createNotePage')
 const createIndex = require('./createIndex')
 const createAbout = require('./createAbout')
-const {createNotebookIndex} = require('./createNotebookIndexes')
+const { createNotebookIndex } = require('./createNotebookIndexes')
 
 const logger = r => {
   console.log('r')
@@ -18,12 +18,12 @@ const logger = r => {
 const getSiblings = nbookid => {
   let notes = []
   return task(r => {
-    return db
+    return db()
       .createValueStream({
         gt: `anotebook:${nbookid}:`,
         lt: `anotebook:${nbookid}:~`
       })
-      .on('data', d => notes.push(JSON.parse(d)))
+      .on('data', d => notes.push(d))
       .on('end', () => r.resolve(notes))
   })
 }
@@ -33,9 +33,8 @@ const collectParents = R.compose(
   R.path(['nbook', 'uuid'])
 )
 
-const processNote = (buf, enc, next) => {
-  console.log('processNote')
-  return R.compose(
+const processNote = (buf, enc, next) =>
+  R.compose(
     r =>
       r.run().listen({
         onResolved: r => {
@@ -45,10 +44,8 @@ const processNote = (buf, enc, next) => {
       }),
     R.map(R.zipObj(['siblings', 'notebooks', 'notedata'])),
     R.map(R.append(buf)),
-    collectParents,
-    logger
+    collectParents
   )(buf)
-}
 
 const end = r => next => {
   r.resolve('end')
@@ -57,19 +54,19 @@ const end = r => next => {
 
 const runme = () => {
   return task(r =>
-    db
+    db()
       .createValueStream({
         keyAsBuffer: false,
         valueAsBuffer: false,
         gt: 'anote:',
         lt: 'anote:~'
       })
-      .on('data', R.compose(processNote,JSON.parse, logger))
+      .on('data', processNote)
       .on('end', () => r.resolve('no more notes'))
   )
-  .chain(createNotebookIndex)
-  .chain(createIndex)
-  .chain(createAbout)
+    .chain(createNotebookIndex)
+    .chain(createIndex)
+    .chain(createAbout)
 }
 
 module.exports = runme

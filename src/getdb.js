@@ -1,6 +1,9 @@
-const level = require('level')
+const levelup = require('levelup')
+const encode = require('encoding-down')
+const leveldown = require('leveldown')
 
-const db = level('./quiverdb')
-const createDB = () => db
+const db = levelup(encode(leveldown('./quiverdb'), { valueEncoding: 'json' }))
 
-module.exports = createDB
+const getDb = () => db
+
+module.exports = getDb

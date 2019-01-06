@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/bfulop/leveltostatic#readme",
   "devDependencies": {
-    "encoding-down": "^5.0.4",
+    "encoding-down": "^6.0.1",
     "jest": "^23.6.0",
     "memdown": "^3.0.0",
     "to-readable-stream": "^1.0.0"
@@ -35,7 +35,8 @@
     "immutable": "^4.0.0-rc.12",
     "immutable-ext": "^1.1.5",
     "level": "^4.0.0",
-    "ramda": "^0.25.0",
+    "leveldown": "^4.0.1",
+    "ramda": "^0.26.1",
     "through2": "^3.0.0",
     "to2": "^1.0.0"
   }
