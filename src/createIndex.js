@@ -6,12 +6,8 @@ const { writeFile } = require('./utils/fileUtils')
 const { latestNotes } = require('./listNotes')
 const { getOrderedTags } = require('./summariseTags')
 
-const createIndex = () => waitAll([
-  getNoteBooks(),
-  latestNotes(10),
-  getOrderedTags()
-])
-  .map(R.zipObj(['notebooks', 'latestnotes', 'tags']))
+const createIndex = () => R.traverse(of, R.identity, [getNoteBooks(), latestNotes(10), getOrderedTags()])
+  .map(R.zipObj(['notebooks', 'latestnotes', 'tags' ]))
   .map(r => createHTML(r))
   .map(
     R.compose(
