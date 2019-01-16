@@ -22,7 +22,23 @@ const orderTags = R.sortWith([
   R.descend(R.path(['value', 'count']))
 ])
 
-const getSiblings = () => of([{key:'atag:tag003:tag006'}])
+const createSiblingSelectors = R.compose(
+    R.over(R.lensProp('lt'), R.concat(R.__, '~')),
+    R.zipObj(['lt', 'gt']),
+    R.map(R.concat(R.__, ':')),
+    R.map(R.replace(/^atag:/, 'atagsibling:')),
+    R.repeat(R.__, 2)
+)
+
+const getSiblings = tObj => task(r => {
+  let siblingxs = []
+  db()
+  .createReadStream(createSiblingSelectors(R.prop('key', tObj)))
+  .on('data', t => siblingxs.push(t))
+  .on('end', () => r.resolve(siblingxs))
+})
+.map(R.filter(R.path(['value', 'child'])))
+
 const addSiblings = R.converge(
   (siblingsT, t) => siblingsT.map(siblings => R.assoc('siblings', siblings, t)),
   [

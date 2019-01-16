@@ -11,8 +11,9 @@ const data = [
   { type: 'put', key: 'atag:tag003', value: {count: 10, parentratio: 2} },
   { type: 'put', key: 'atag:tag001', value: {count: 15, parentratio: 1} },
   { type: 'put', key: 'atag:tag002', value: {count: 17, parentratio: 1} },
-  { type: 'put', key: 'atag:tag003:tag005', value: {count:7, child:false} },
-  { type: 'put', key: 'atag:tag003:tag006', value: {count:9, child:true} },
+  // testing siblings
+  { type: 'put', key: 'atagsibling:tag003:tag005', value: {count:7, child:false} },
+  { type: 'put', key: 'atagsibling:tag003:tag006', value: {count:9, child:true} },
 ]
 db.batch(data, err => {
   if (err) {
@@ -50,7 +51,14 @@ describe('summarising the tags', () => {
   })
   describe('adds the child/sibling tags', () => {
     test('keep only child:true', () => {
-      return expect(result[0].siblings).toContainEqual({key:'atag:tag003:tag006'})
+      return expect(result[0].siblings).toContainEqual(
+        expect.objectContaining({key:'atagsibling:tag003:tag006'})
+      )
+    })
+    test('filtered not childrend', () => {
+      return expect(result[0].siblings).not.toContainEqual(
+        expect.objectContaining({key:'atagsibling:tag003:tag005'})
+      )
     })
   })
 })
