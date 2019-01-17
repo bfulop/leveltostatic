@@ -27,6 +27,11 @@ const data = [
   { type: 'put', key: 'tagsnotes:tag003:notes:123:note001', value: {nbook:{uuid:'nbook002'}} },
   // this will be listed, the containing notebook is not listed above
   { type: 'put', key: 'tagsnotes:tag003:notes:124:note002', value: {nbook:{uuid:'nbook001'}} },
+  // this should be listed under tag007 child tag
+  { type: 'put', key: 'tagsnotes:tag003:notes:124:note012', value: {nbook:{uuid:'nbook001'}} },
+  { type: 'put', key: 'tagsnotes:tag007:notes:125:note012', value: {nbook:{uuid:'nbook001'}} },
+  // note013 should NOT be listed as child (not part of parent)
+  { type: 'put', key: 'tagsnotes:tag007:notes:126:note013', value: {nbook:{uuid:'nbook001'}} },
   // grandchildren listing
   // notebooks from children tags
   { type: 'put', key: 'atagnotebook:tag007:48:nbook003', value: {count:25, size:28} },
@@ -37,7 +42,7 @@ db.batch(data, err => {
   if (err) {
     console.log('ooops!', err)
   } else {
-    console.log('data seeded')
+    // console.log('data seeded')
   }
 })
 
@@ -119,6 +124,23 @@ describe('summarising the tags', () => {
     test('not related (to parent) notebook removed', () => {
       return expect(result[0].siblings[1].notebooks).not.toContainEqual(
         expect.objectContaining({key:'atagnotebook:tag007:23:nbook004'})
+      )
+    })
+  })
+  describe('listing sibling notes', () => {
+    test('siblings note added', () => {
+      return expect(result[0].siblings[1].notes).toContainEqual(
+        expect.objectContaining({key:'tagsnotes:tag007:notes:125:note012'})
+      )
+    })
+    test('"moves" from the parent notes list', () => {
+      return expect(result[0].notes).not.toContainEqual(
+        expect.objectContaining({key:'tagsnotes:tag003:notes:124:note012'})
+      )
+    })
+    test('not related (to parent) notes removed', () => {
+      return expect(result[0].siblings[1].notes).not.toContainEqual(
+        expect.objectContaining({key:'tagsnotes:tag007:notes:126:note013'})
       )
     })
   })
