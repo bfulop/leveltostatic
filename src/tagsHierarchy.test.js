@@ -18,6 +18,11 @@ const data = [
   // testing related notebooks
   { type: 'put', key: 'atagnotebook:tag003:55:nbook001', value: {count:1, size:28} },
   { type: 'put', key: 'atagnotebook:tag003:48:nbook002', value: {count:25, size:28} },
+  // testing adding notes
+  // the first will not be listed, it's already in nbook002
+  { type: 'put', key: 'tagsnotes:tag003:notes:123:note001', value: {nbook:{uuid:'nbook002'}} },
+  // this will be listed, the containing notebook is not listed above
+  { type: 'put', key: 'tagsnotes:tag003:notes:124:note002', value: {nbook:{uuid:'nbook001'}} },
 ]
 db.batch(data, err => {
   if (err) {
@@ -74,6 +79,18 @@ describe('summarising the tags', () => {
     test('only strongly related notebooks (index below 50)', () => {
       return expect(result[0].notebooks).not.toContainEqual(
         expect.objectContaining({key:'atagnotebook:tag003:55:nbook001'})
+      )
+    })
+  })
+  describe('Adding notes', () => {
+    test('adds notes', () => {
+      return expect(result[0].notes).toContainEqual(
+        expect.objectContaining({key:'tagsnotes:tag003:notes:124:note002'})
+      )
+    })
+    test('but doesnt add notes that are part of listed notebooks', () => {
+      return expect(result[0].notes).not.toContainEqual(
+        expect.objectContaining({key:'tagsnotes:tag003:notes:123:note001'})
       )
     })
   })

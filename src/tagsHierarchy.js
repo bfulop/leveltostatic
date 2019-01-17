@@ -41,7 +41,7 @@ const getSiblings = tObj => task(r => {
 .map(R.sortBy(R.path(['value', 'count'])))
 
 const addSiblings = R.converge(
-  (siblingsT, t) => siblingsT.map(siblings => R.assoc('siblings', siblings, t)),
+  (siblingsT, t) => siblingsT.map(v => R.assoc('siblings', v, t)),
   [
     getSiblings,
     R.identity
@@ -68,9 +68,33 @@ const getNotebooks = tObj => task(r => {
 ]))
 
 const addNotebooks = R.converge(
-  (notebooksT, t) => notebooksT.map(siblings => R.assoc('notebooks', siblings, t)),
+  (notebooksT, t) => notebooksT.map(v => R.assoc('notebooks', v, t)),
   [
     getNotebooks,
+    R.identity
+  ]
+)
+
+const inNotebook = (o, t) => R.compose(
+  R.any(R.compose(
+    R.test(new RegExp(R.path(['value', 'nbook', 'uuid'], t))),
+    R.prop('key'))
+  ),
+  R.prop('notebooks')
+)(o)
+const inNotebookC = R.curry(inNotebook)
+const getNotes = tObj => task(r => {
+  let notexs = []
+  db()
+  .createReadStream(createSelectors('tagsnotes:')(R.prop('key', tObj)))
+  .on('data', R.unless(inNotebookC(tObj), t => notexs.push(t)))
+  .on('end', () => r.resolve(notexs))
+})
+
+const addNotes = R.converge(
+  (notesT, t) => notesT.map(v => R.assoc('notes', v, t)),
+  [
+    getNotes,
     R.identity
   ]
 )
@@ -86,6 +110,8 @@ const processtags = () => task(r => {
 .map(R.map(addSiblings))
 .chain(waitAll)
 .map(R.map(addNotebooks))
+.chain(waitAll)
+.map(R.map(addNotes))
 .chain(waitAll)
 
 module.exports = { processtags }
