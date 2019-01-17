@@ -11,7 +11,7 @@ const createIndex = () => R.traverse(of, R.identity, [getNoteBooks(), latestNote
   .map(r => createHTML(r))
   .map(
     R.compose(
-      R.assoc('path', '../dist/index.html'),
+      R.assoc('path', './dist/index.html'),
       R.objOf('html')
     )
   )

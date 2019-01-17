@@ -28,7 +28,7 @@ describe('creates path and content', () => {
   })
   test('creates the correct path', () => {
     expect(subject(notedata)).toMatchObject({
-      path: '../dist/a-long-and-name-eu/exercise-adding-webpack.html',
+      path: './dist/a-long-and-name-eu/exercise-adding-webpack.html',
       html: 'html content'
     })
   })

@@ -62,7 +62,7 @@ describe('getting list of notebooks and saving an index file', () => {
   test('calls writefile with merged data', () => {
     expect(writeFile).toBeCalledWith(
       expect.objectContaining({
-        path: '../dist/cleanpath/index.html',
+        path: './dist/cleanpath/index.html',
         html: 'indexHTML'
       })
     )

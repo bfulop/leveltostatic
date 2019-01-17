@@ -43,7 +43,7 @@ const addPath = R.ap(
   createpathprop,
   R.compose(
     R.concat(R.__, '/index.html'),
-    R.concat('../dist/'),
+    R.concat('./dist/'),
     createCleanPath,
     R.view(R.lensPath(['notebook', 'name']))
   )
