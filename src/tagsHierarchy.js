@@ -195,13 +195,27 @@ const listRootNotebooks = R.compose(
   R.map(getNbookfromKey),
   R.prop('notebooks'),
 )
+const listRootNotes = R.compose(
+  R.map(getNbookfromKey),
+  R.prop('notes'),
+)
 const filterSiblingNotebook = R.curry((sourcexs, targetxs) => R.filter(keyMatchesTag(sourcexs), targetxs))
 const filterSiblingNbooks = nbookxs => R.map(R.over(R.lensProp('notebooks'), filterSiblingNotebook(nbookxs)))
+const filterSiblingNotes = nbookxs => R.map(R.over(R.lensProp('notes'), filterSiblingNotebook(nbookxs)))
 const cleanChildNotebooks = R.converge(
   (nbookxs, atag) =>
     R.over(R.lensProp('siblings'), filterSiblingNbooks(nbookxs), atag),
   [
     listRootNotebooks,
+    R.identity
+  ]
+)
+
+const cleanChildNotes = R.converge(
+  (notexs, atag) =>
+    R.over(R.lensProp('siblings'), filterSiblingNotes(notexs), atag),
+  [
+    listRootNotes,
     R.identity
   ]
 )
@@ -239,6 +253,7 @@ const processtags = () =>
     .map(R.map(removeNotebooksFromRoot))
     .map(R.map(addSiblingsNote))
     .chain(waitAll)
+    .map(R.map(cleanChildNotes))
     .map(R.map(removeNotesFromRoot))
 
 module.exports = { processtags }
