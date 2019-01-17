@@ -14,6 +14,10 @@ const data = [
   // testing siblings
   { type: 'put', key: 'atagsibling:tag003:tag005', value: {count:7, child:false} },
   { type: 'put', key: 'atagsibling:tag003:tag006', value: {count:9, child:true} },
+  { type: 'put', key: 'atagsibling:tag003:tag007', value: {count:10, child:true} },
+  // testing related notebooks
+  { type: 'put', key: 'atagnotebook:tag003:55:nbook001', value: {count:1, size:28} },
+  { type: 'put', key: 'atagnotebook:tag003:48:nbook002', value: {count:25, size:28} },
 ]
 db.batch(data, err => {
   if (err) {
@@ -50,14 +54,26 @@ describe('summarising the tags', () => {
     })
   })
   describe('adds the child/sibling tags', () => {
-    test('keep only child:true', () => {
+    test('keep only child:true and ordered by count', () => {
       return expect(result[0].siblings).toContainEqual(
-        expect.objectContaining({key:'atagsibling:tag003:tag006'})
+        expect.objectContaining({key:'atagsibling:tag003:tag007'})
       )
     })
     test('filtered not childrend', () => {
       return expect(result[0].siblings).not.toContainEqual(
         expect.objectContaining({key:'atagsibling:tag003:tag005'})
+      )
+    })
+  })
+  describe('adds related notebooks', () => {
+    test('inserts the notebooks list', () => {
+      return expect(result[0].notebooks).toContainEqual(
+        expect.objectContaining({key:'atagnotebook:tag003:48:nbook002'})
+      )
+    })
+    test('only strongly related notebooks (index below 50)', () => {
+      return expect(result[0].notebooks).not.toContainEqual(
+        expect.objectContaining({key:'atagnotebook:tag003:55:nbook001'})
       )
     })
   })

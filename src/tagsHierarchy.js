@@ -22,27 +22,55 @@ const orderTags = R.sortWith([
   R.descend(R.path(['value', 'count']))
 ])
 
-const createSiblingSelectors = R.compose(
+const createSelectors = listname => R.compose(
     R.over(R.lensProp('lt'), R.concat(R.__, '~')),
     R.zipObj(['lt', 'gt']),
     R.map(R.concat(R.__, ':')),
-    R.map(R.replace(/^atag:/, 'atagsibling:')),
+    R.map(R.replace(/^atag:/, listname)),
     R.repeat(R.__, 2)
 )
 
 const getSiblings = tObj => task(r => {
   let siblingxs = []
   db()
-  .createReadStream(createSiblingSelectors(R.prop('key', tObj)))
+  .createReadStream(createSelectors('atagsibling:')(R.prop('key', tObj)))
   .on('data', t => siblingxs.push(t))
   .on('end', () => r.resolve(siblingxs))
 })
 .map(R.filter(R.path(['value', 'child'])))
+.map(R.sortBy(R.path(['value', 'count'])))
 
 const addSiblings = R.converge(
   (siblingsT, t) => siblingsT.map(siblings => R.assoc('siblings', siblings, t)),
   [
     getSiblings,
+    R.identity
+  ]
+)
+
+const getNotebooks = tObj => task(r => {
+  let notebooks = []
+  db()
+  .createReadStream(
+    R.compose(
+      R.over(R.lensProp('lt'), R.replace('~', '50')),
+      R.compose(
+        createSelectors('atagnotebook:'),
+        (R.prop('key')),
+      )
+    )(tObj)
+)
+  .on('data', t => notebooks.push(t))
+  .on('end', () => r.resolve(notebooks))
+})
+.map(R.sortWith([
+  R.descend(R.path(['value', 'count']))
+]))
+
+const addNotebooks = R.converge(
+  (notebooksT, t) => notebooksT.map(siblings => R.assoc('notebooks', siblings, t)),
+  [
+    getNotebooks,
     R.identity
   ]
 )
@@ -56,6 +84,8 @@ const processtags = () => task(r => {
 })
 .map(orderTags)
 .map(R.map(addSiblings))
+.chain(waitAll)
+.map(R.map(addNotebooks))
 .chain(waitAll)
 
 module.exports = { processtags }
