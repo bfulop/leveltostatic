@@ -20,6 +20,8 @@ const data = [
   { type: 'put', key: 'atagnotebook:tag003:48:nbook002', value: {count:25, size:28} },
   // nbook003 should be listed with the sibling tag tag007
   { type: 'put', key: 'atagnotebook:tag003:48:nbook003', value: {count:24, size:28} },
+  // nbook004 should NOT be in child list either
+  { type: 'put', key: 'atagnotebook:tag003:79:nbook004', value: {count:12, size:28} },
   // testing adding notes
   // the first will not be listed, it's already in nbook002
   { type: 'put', key: 'tagsnotes:tag003:notes:123:note001', value: {nbook:{uuid:'nbook002'}} },
@@ -29,6 +31,7 @@ const data = [
   // notebooks from children tags
   { type: 'put', key: 'atagnotebook:tag007:48:nbook003', value: {count:25, size:28} },
   { type: 'put', key: 'atagnotebook:tag005:53:nbook002', value: {count:25, size:28} },
+  { type: 'put', key: 'atagnotebook:tag007:23:nbook004', value: {count:12, size:28} },
 ]
 db.batch(data, err => {
   if (err) {
@@ -111,6 +114,11 @@ describe('summarising the tags', () => {
     test('"moves" from the parent notebooks list', () => {
       return expect(result[0].notebooks).not.toContainEqual(
         expect.objectContaining({key:'atagnotebook:tag003:48:nbook003'})
+      )
+    })
+    test('not related (to parent) notebook removed', () => {
+      return expect(result[0].siblings[1].notebooks).not.toContainEqual(
+        expect.objectContaining({key:'atagnotebook:tag007:23:nbook004'})
       )
     })
   })

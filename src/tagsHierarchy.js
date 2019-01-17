@@ -94,12 +94,14 @@ const addNotes = R.converge(
   [getNotes, R.identity]
 )
 
-const insertSiblingsNotebooksold = s => of(R.assoc('notebooks', [{key:'atagnotebook:tag007:48:nbook002'}], s))
-const getSiblingNotebooks = sObj => task(r => {
-  console.log('sobj %o', sObj)
-  console.log('sobj %o', sObj)
-  r.resolve([{key:'atagnotebook:tag007:48:nbook002'}])
-})
+const insertSiblingsNotebooksold = s =>
+  of(R.assoc('notebooks', [{ key: 'atagnotebook:tag007:48:nbook002' }], s))
+const getSiblingNotebooks = sObj =>
+  task(r => {
+    console.log('sobj %o', sObj)
+    console.log('sobj %o', sObj)
+    r.resolve([{ key: 'atagnotebook:tag007:48:nbook002' }])
+  })
 
 const convertSiblingTagName = R.compose(
   R.concat('atag:'),
@@ -107,25 +109,16 @@ const convertSiblingTagName = R.compose(
   R.split(':')
 )
 const insertSiblingsNotebooks = R.compose(
-  R.map(R.converge(
-    R.set(R.lensProp('key')),
-    [
-      R.prop('_key'),
-      R.identity
-    ]
-  )),
+  R.map(R.converge(R.set(R.lensProp('key')), [R.prop('_key'), R.identity])),
   addNotebooks,
   R.over(R.lensProp('key'), convertSiblingTagName),
-  R.converge(
-    R.assoc('_key'),
-    [
-      R.prop('key'),
-      R.identity
-    ]
-  )
+  R.converge(R.assoc('_key'), [R.prop('key'), R.identity])
 )
 
-const addSiblingsNotebooksOld = R.over(R.lensProp('siblings'), R.map(insertSiblingsNotebooks))
+const addSiblingsNotebooksOld = R.over(
+  R.lensProp('siblings'),
+  R.map(insertSiblingsNotebooks)
+)
 
 const processSiblingNotebooks = R.compose(
   waitAll,
@@ -146,23 +139,38 @@ const listChildNotebooks = R.compose(
   R.prop('siblings')
 )
 
-const keyMatchesTag = R.curry((sourcexs, tObj) => R.contains(getNbookfromKey(tObj), sourcexs))
-const filterNbooks = R.curry((sourcexs, targetxs) => R.reject(keyMatchesTag(sourcexs), targetxs))
+const keyMatchesTag = R.curry((sourcexs, tObj) =>
+  R.contains(getNbookfromKey(tObj), sourcexs)
+)
+const filterNbooks = R.curry((sourcexs, targetxs) =>
+  R.reject(keyMatchesTag(sourcexs), targetxs)
+)
 
 const removeNotebooksFromRoot = R.converge(
-  (nbookxs, atag) => R.over(R.lensProp('notebooks'), filterNbooks(nbookxs), atag),
+  (nbookxs, atag) =>
+    R.over(R.lensProp('notebooks'), filterNbooks(nbookxs), atag),
+  [listChildNotebooks, R.identity]
+)
+
+const listRootNotebooks = R.compose(
+  R.map(getNbookfromKey),
+  R.prop('notebooks'),
+)
+const filterSiblingNotebook = R.curry((sourcexs, targetxs) => R.filter(keyMatchesTag(sourcexs), targetxs))
+const filterSiblingNbooks = nbookxs => R.map(R.over(R.lensProp('notebooks'), filterSiblingNotebook(nbookxs)))
+const cleanChildNotebooks = R.converge(
+  (nbookxs, atag) =>
+    R.over(R.lensProp('siblings'), filterSiblingNbooks(nbookxs), atag),
   [
-    listChildNotebooks,
+    listRootNotebooks,
     R.identity
   ]
 )
 
 const addSiblingsNotebooks = R.converge(
-  (processedSiblingNotebooksT, t) => processedSiblingNotebooksT.map(v => R.set(R.lensProp('siblings'), v, t)),
-  [
-    processSiblingNotebooks,
-    R.identity
-  ]
+  (processedSiblingNotebooksT, t) =>
+    processedSiblingNotebooksT.map(v => R.set(R.lensProp('siblings'), v, t)),
+  [processSiblingNotebooks, R.identity]
 )
 
 const processtags = () =>
@@ -182,6 +190,7 @@ const processtags = () =>
     .chain(waitAll)
     .map(R.map(addSiblingsNotebooks))
     .chain(waitAll)
+    .map(R.map(cleanChildNotebooks))
     .map(R.map(removeNotebooksFromRoot))
 
 module.exports = { processtags }
