@@ -4,9 +4,9 @@ const { getNoteBooks } = require('./listNoteBooks')
 const createHTML = require('../../templates/generateIndexHTML')
 const { writeFile } = require('./utils/fileUtils')
 const { latestNotes } = require('./listNotes')
-const { getOrderedTags } = require('./summariseTags')
+const { processtags } = require('./tagsHierarchy')
 
-const createIndex = () => R.traverse(of, R.identity, [getNoteBooks(), latestNotes(10), getOrderedTags()])
+const createIndex = () => R.traverse(of, R.identity, [getNoteBooks(), latestNotes(10), processtags()])
   .map(R.zipObj(['notebooks', 'latestnotes', 'tags' ]))
   .map(r => createHTML(r))
   .map(
