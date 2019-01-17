@@ -11,6 +11,8 @@ const data = [
   { type: 'put', key: 'atag:tag003', value: {count: 10, parentratio: 2} },
   { type: 'put', key: 'atag:tag001', value: {count: 15, parentratio: 1} },
   { type: 'put', key: 'atag:tag002', value: {count: 17, parentratio: 1} },
+  { type: 'put', key: 'atag:tag006', value: {count: 17, parentratio: -1} },
+  { type: 'put', key: 'atag:tag007', value: {count: 17, parentratio: -1, pants: 'shoes'} },
   // testing siblings
   { type: 'put', key: 'atagsibling:tag003:tag005', value: {count:7, child:false} },
   { type: 'put', key: 'atagsibling:tag003:tag006', value: {count:9, child:true} },
@@ -142,6 +144,11 @@ describe('summarising the tags', () => {
       return expect(result[0].siblings[1].notes).not.toContainEqual(
         expect.objectContaining({key:'tagsnotes:tag007:notes:126:note013'})
       )
+    })
+  })
+  describe('merges in sibling notes data', () => {
+    test('adds info from atag:tag007', () => {
+      return expect(result[0].siblings[1]).toMatchObject( {value:{pants: 'shoes'}})
     })
   })
 })

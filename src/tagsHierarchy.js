@@ -31,6 +31,21 @@ const createSelectors = listname =>
     R.repeat(R.__, 2)
   )
 
+const getTagInfo = R.compose(
+  getT,
+  R.concat('atag:'),
+  R.last,
+  R.split(':'),
+  R.prop('key')
+)
+
+const importTagInfo = R.converge(
+  (tagInfoT, t) => tagInfoT.map(v => R.mergeDeepLeft(t, v)),
+  [
+    getTagInfo,
+    R.identity
+  ]
+)
 const getSiblings = tObj =>
   task(r => {
     let siblingxs = []
@@ -41,6 +56,8 @@ const getSiblings = tObj =>
   })
     .map(R.filter(R.path(['value', 'child'])))
     .map(R.sortBy(R.path(['value', 'count'])))
+    .map(R.map(importTagInfo))
+    .chain(waitAll)
 
 const addSiblings = R.converge(
   (siblingsT, t) => siblingsT.map(v => R.assoc('siblings', v, t)),
