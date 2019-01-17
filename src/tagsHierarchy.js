@@ -154,17 +154,17 @@ const removeNotebooksFromRoot = R.converge(
 
 const listRootNotebooks = R.compose(
   R.map(getNbookfromKey),
-  R.prop('notebooks'),
+  R.prop('notebooks')
 )
-const filterSiblingNotebook = R.curry((sourcexs, targetxs) => R.filter(keyMatchesTag(sourcexs), targetxs))
-const filterSiblingNbooks = nbookxs => R.map(R.over(R.lensProp('notebooks'), filterSiblingNotebook(nbookxs)))
+const filterSiblingNotebook = R.curry((sourcexs, targetxs) =>
+  R.filter(keyMatchesTag(sourcexs), targetxs)
+)
+const filterSiblingNbooks = nbookxs =>
+  R.map(R.over(R.lensProp('notebooks'), filterSiblingNotebook(nbookxs)))
 const cleanChildNotebooks = R.converge(
   (nbookxs, atag) =>
     R.over(R.lensProp('siblings'), filterSiblingNbooks(nbookxs), atag),
-  [
-    listRootNotebooks,
-    R.identity
-  ]
+  [listRootNotebooks, R.identity]
 )
 
 const addSiblingsNotebooks = R.converge(
