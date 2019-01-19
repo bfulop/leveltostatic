@@ -18,22 +18,22 @@ const data = [
   { type: 'put', key: 'atagsibling:tag003:tag006', value: {count:9, child:true} },
   { type: 'put', key: 'atagsibling:tag003:tag007', value: {count:10, child:true} },
   // testing related notebooks
-  { type: 'put', key: 'atagnotebook:tag003:55:nbook001', value: {count:1, size:28} },
-  { type: 'put', key: 'atagnotebook:tag003:48:nbook002', value: {count:25, size:28} },
+  { type: 'put', key: 'atagnotebook:tag003:55:nbook001', value: {uuid: 'nbook001', count:1, size:28} },
+  { type: 'put', key: 'atagnotebook:tag003:38:nbook002', value: {uuid: 'nbook002', count:25, size:28} },
   // nbook003 should be listed with the sibling tag tag007
-  { type: 'put', key: 'atagnotebook:tag003:48:nbook003', value: {count:24, size:28} },
+  { type: 'put', key: 'atagnotebook:tag003:48:nbook003', value: {uuid: 'nbook003', count:24, size:28} },
   // nbook004 should NOT be in child list either
-  { type: 'put', key: 'atagnotebook:tag003:79:nbook004', value: {count:12, size:28} },
+  { type: 'put', key: 'atagnotebook:tag003:79:nbook004', value: {uuid: 'nbook004', count:12, size:28} },
   // testing adding notes
   // the first will not be listed, it's already in nbook002
-  { type: 'put', key: 'tagsnotes:tag003:notes:123:note001', value: {nbook:{uuid:'nbook002'}} },
+  { type: 'put', key: 'tagsnotes:tag003:notes:123:note001', value: {meta:{nbook:{uuid:'nbook002'}}} },
   // this will be listed, the containing notebook is not listed above
-  { type: 'put', key: 'tagsnotes:tag003:notes:124:note002', value: {nbook:{uuid:'nbook001'}} },
+  { type: 'put', key: 'tagsnotes:tag003:notes:124:note002', value: {meta:{nbook:{uuid:'nbook001'}}} },
   // this should be listed under tag007 child tag
-  { type: 'put', key: 'tagsnotes:tag003:notes:124:note012', value: {nbook:{uuid:'nbook001'}} },
-  { type: 'put', key: 'tagsnotes:tag007:notes:125:note012', value: {nbook:{uuid:'nbook001'}} },
+  { type: 'put', key: 'tagsnotes:tag003:notes:124:note012', value: {meta:{nbook:{uuid:'nbook001'}}} },
+  { type: 'put', key: 'tagsnotes:tag007:notes:125:note012', value: {meta:{nbook:{uuid:'nbook001'}}} },
   // note013 should NOT be listed as child (not part of parent)
-  { type: 'put', key: 'tagsnotes:tag007:notes:126:note013', value: {nbook:{uuid:'nbook001'}} },
+  { type: 'put', key: 'tagsnotes:tag007:notes:126:note013', value: {meta:{nbook:{uuid:'nbook001'}}} },
   // grandchildren listing
   // notebooks from children tags
   { type: 'put', key: 'atagnotebook:tag007:48:nbook003', value: {count:25, size:28} },
@@ -91,7 +91,7 @@ describe('summarising the tags', () => {
   describe('adds related notebooks', () => {
     test('inserts the notebooks list', () => {
       return expect(result[0].notebooks).toContainEqual(
-        expect.objectContaining({key:'atagnotebook:tag003:48:nbook002'})
+        expect.objectContaining({key:'atagnotebook:tag003:38:nbook002'})
       )
     })
     test('only strongly related notebooks (index below 50)', () => {
@@ -114,7 +114,7 @@ describe('summarising the tags', () => {
   })
   describe('listing child tags notebooks', () => {
     test('sibling notebook added', () => {
-      return expect(result[0].siblings[1].notebooks).toContainEqual(
+      return expect(result[0].siblings[0].notebooks).toContainEqual(
         expect.objectContaining({key:'atagnotebook:tag007:48:nbook003'})
       )
     })
@@ -124,14 +124,14 @@ describe('summarising the tags', () => {
       )
     })
     test('not related (to parent) notebook removed', () => {
-      return expect(result[0].siblings[1].notebooks).not.toContainEqual(
+      return expect(result[0].siblings[0].notebooks).not.toContainEqual(
         expect.objectContaining({key:'atagnotebook:tag007:23:nbook004'})
       )
     })
   })
   describe('listing sibling notes', () => {
     test('siblings note added', () => {
-      return expect(result[0].siblings[1].notes).toContainEqual(
+      return expect(result[0].siblings[0].notes).toContainEqual(
         expect.objectContaining({key:'tagsnotes:tag007:notes:125:note012'})
       )
     })
@@ -141,14 +141,19 @@ describe('summarising the tags', () => {
       )
     })
     test('not related (to parent) notes removed', () => {
-      return expect(result[0].siblings[1].notes).not.toContainEqual(
+      return expect(result[0].siblings[0].notes).not.toContainEqual(
         expect.objectContaining({key:'tagsnotes:tag007:notes:126:note013'})
       )
     })
   })
   describe('merges in sibling notes data', () => {
     test('adds info from atag:tag007', () => {
-      return expect(result[0].siblings[1]).toMatchObject( {value:{pants: 'shoes'}})
+      return expect(result[0].siblings[0]).toMatchObject( {value:{pants: 'shoes'}})
+    })
+  })
+  describe('removes empty siblings', () => {
+    test('only one sibling is retained', () => {
+      return expect(result[0].siblings.length).toEqual(1)
     })
   })
 })

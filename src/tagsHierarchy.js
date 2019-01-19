@@ -64,13 +64,13 @@ const addSiblings = R.converge(
   [getSiblings, R.identity]
 )
 
-const getNotebooks = tObj =>
+const getNotebooks = limit => tObj =>
   task(r => {
     let notebooks = []
     db()
       .createReadStream(
         R.compose(
-          R.over(R.lensProp('lt'), R.replace('~', '50')),
+          R.over(R.lensProp('lt'), R.replace('~', limit)),
           R.compose(
             createSelectors('atagnotebook:'),
             R.prop('key')
@@ -94,9 +94,9 @@ const getSiblingNotes = tObj =>
       .on('end', () => r.resolve(notes))
   }).map(R.sortWith([R.descend(R.path(['value', 'count']))]))
 
-const addNotebooks = R.converge(
+const addNotebooks = limit => R.converge(
   (notebooksT, t) => notebooksT.map(v => R.assoc('notebooks', v, t)),
-  [getNotebooks, R.identity]
+  [getNotebooks(limit), R.identity]
 )
 const addSiblingNotes = R.converge(
   (notesT, t) => notesT.map(v => R.assoc('notes', v, t)),
@@ -107,8 +107,8 @@ const inNotebook = (o, t) =>
   R.compose(
     R.any(
       R.compose(
-        R.test(new RegExp(R.path(['value', 'nbook', 'uuid'], t))),
-        R.prop('key')
+        R.equals(R.path(['value', 'meta', 'nbook', 'uuid'], t)),
+        R.path(['value', 'uuid']),
       )
     ),
     R.prop('notebooks')
@@ -142,9 +142,9 @@ const convertSiblingTagName = R.compose(
   R.nth(2),
   R.split(':')
 )
-const insertSiblingsNotebooks = R.compose(
+const insertSiblingsNotebooks = limit => R.compose(
   R.map(R.converge(R.set(R.lensProp('key')), [R.prop('_key'), R.identity])),
-  addNotebooks,
+  addNotebooks(limit),
   R.over(R.lensProp('key'), convertSiblingTagName),
   R.converge(R.assoc('_key'), [R.prop('key'), R.identity])
 )
@@ -160,9 +160,9 @@ const addSiblingsNotebooksOld = R.over(
   R.map(insertSiblingsNotebooks)
 )
 
-const processSiblingNotebooks = R.compose(
+const processSiblingNotebooks = limit => R.compose(
   waitAll,
-  R.map(insertSiblingsNotebooks),
+  R.map(insertSiblingsNotebooks(limit)),
   R.prop('siblings')
 )
 const processSiblingNotes = R.compose(
@@ -237,10 +237,10 @@ const cleanChildNotes = R.converge(
   ]
 )
 
-const addSiblingsNotebooks = R.converge(
+const addSiblingsNotebooks = limit => R.converge(
   (processedSiblingNotebooksT, t) =>
     processedSiblingNotebooksT.map(v => R.set(R.lensProp('siblings'), v, t)),
-  [processSiblingNotebooks, R.identity]
+  [processSiblingNotebooks(limit), R.identity]
 )
 
 const addSiblingsNote = R.converge(
@@ -248,6 +248,16 @@ const addSiblingsNote = R.converge(
     processedSiblingNotesT.map(v => R.set(R.lensProp('siblings'), v, t)),
   [processSiblingNotes, R.identity]
 )
+const filterSiblingsList = R.filter(R.converge(
+  R.compose(R.gt(R.__, 0), R.add),
+  [
+    R.compose(R.length, R.prop('notebooks')),
+    R.compose(R.length, R.prop('notes'))
+  ]
+))
+const removeEmptySiblings = R.over(R.lensProp('siblings'), filterSiblingsList)
+
+const orderSiblings = R.over(R.lensProp('siblings'), R.sortWith(R.descend(R.path(['value', 'count']))))
 
 const processtags = () =>
   task(r => {
@@ -258,13 +268,14 @@ const processtags = () =>
       .on('end', () => r.resolve(tagxs))
   })
     .map(orderTags)
+    .map(R.take(5))
     .map(R.map(addSiblings))
     .chain(waitAll)
-    .map(R.map(addNotebooks))
+    .map(R.map(addNotebooks(50)))
     .chain(waitAll)
     .map(R.map(addNotes))
     .chain(waitAll)
-    .map(R.map(addSiblingsNotebooks))
+    .map(R.map(addSiblingsNotebooks(60)))
     .chain(waitAll)
     .map(R.map(cleanChildNotebooks))
     .map(R.map(removeNotebooksFromRoot))
@@ -272,5 +283,7 @@ const processtags = () =>
     .chain(waitAll)
     .map(R.map(cleanChildNotes))
     .map(R.map(removeNotesFromRoot))
+    .map(R.map(removeEmptySiblings))
+    .map(R.map(orderSiblings))
 
 module.exports = { processtags }
