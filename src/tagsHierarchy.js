@@ -257,7 +257,11 @@ const filterSiblingsList = R.filter(R.converge(
 ))
 const removeEmptySiblings = R.over(R.lensProp('siblings'), filterSiblingsList)
 
-const orderSiblings = R.over(R.lensProp('siblings'), R.sortWith(R.descend(R.path(['value', 'count']))))
+const orderSiblingsList = R.sortWith([
+  R.descend(R.compose(R.length, R.prop('notebooks'))),
+  R.descend(R.compose(R.length, R.prop('notes')))
+])
+const orderSiblings = R.over(R.lensProp('siblings'), R.sortWith(orderSiblingsList))
 
 const processtags = () =>
   task(r => {
