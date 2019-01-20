@@ -261,7 +261,7 @@ const orderSiblingsList = R.sortWith([
   R.descend(R.compose(R.length, R.prop('notebooks'))),
   R.descend(R.compose(R.length, R.prop('notes')))
 ])
-const orderSiblings = R.over(R.lensProp('siblings'), R.sortWith(orderSiblingsList))
+const orderSiblings = R.over(R.lensProp('siblings'), orderSiblingsList)
 
 const processtags = () =>
   task(r => {
