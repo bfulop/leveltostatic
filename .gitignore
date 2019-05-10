@@ -4,3 +4,4 @@ testdb
 quiverdb
 dist
 .DS_Store
+config.json

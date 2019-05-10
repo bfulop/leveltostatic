@@ -4,18 +4,36 @@ const Maybe = require('folktale/maybe')
 const db = require('./getdb')
 
 const logger = r => {
-  console.log('----------------------------')
+  console.log('src/tagsHierarchy.js----------------------------')
   console.log(r)
   return r
 }
 
-const safeGet = r =>
-  db()
-    .get(r)
-    .then(Maybe.Just)
-    .catch(Maybe.Nothing)
+function safeGet(r) {
+  return task(function getfromdb(resolver) {
+    return db()
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.get(r)
+            .then(function returnV(val) {
+              return resolver.resolve(Maybe.Just(val))
+            })
+            .catch(function returnV(err) {
+              return resolver.resolve(Maybe.Nothing)
+            })
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
+      })
+  })
+}
 
-const getT = fromPromised(safeGet)
+const getT = R.compose(
+  fromPromised,
+  safeGet
+)
 
 const orderTags = R.sortWith([
   R.descend(R.path(['value', 'parentratio'])),
@@ -32,7 +50,7 @@ const createSelectors = listname =>
   )
 
 const getTagInfo = R.compose(
-  getT,
+  safeGet,
   R.concat('atag:'),
   R.last,
   R.split(':'),
@@ -41,23 +59,32 @@ const getTagInfo = R.compose(
 
 const importTagInfo = R.converge(
   (tagInfoT, t) => tagInfoT.map(v => R.mergeDeepLeft(t, v)),
-  [
-    getTagInfo,
-    R.identity
-  ]
+  [getTagInfo, R.identity]
 )
-const getSiblings = tObj =>
-  task(r => {
+
+function getSiblings(tObj) {
+  return task(r => {
     let siblingxs = []
-    db()
-      .createReadStream(createSelectors('atagsibling:')(R.prop('key', tObj)))
-      .on('data', t => siblingxs.push(t))
-      .on('end', () => r.resolve(siblingxs))
+    return db()
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.createReadStream(
+            createSelectors('atagsibling:')(R.prop('key', tObj))
+          )
+            .on('data', t => siblingxs.push(t))
+            .on('end', () => r.resolve(siblingxs))
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
+      })
   })
     .map(R.filter(R.path(['value', 'child'])))
     .map(R.sortBy(R.path(['value', 'count'])))
     .map(R.map(importTagInfo))
     .chain(waitAll)
+}
 
 const addSiblings = R.converge(
   (siblingsT, t) => siblingsT.map(v => R.assoc('siblings', v, t)),
@@ -67,37 +94,55 @@ const addSiblings = R.converge(
 const getNotebooks = limit => tObj =>
   task(r => {
     let notebooks = []
-    db()
-      .createReadStream(
-        R.compose(
-          R.over(R.lensProp('lt'), R.replace('~', limit)),
-          R.compose(
-            createSelectors('atagnotebook:'),
-            R.prop('key')
+    return db()
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.createReadStream(
+            R.compose(
+              R.over(R.lensProp('lt'), R.replace('~', limit)),
+              R.compose(
+                createSelectors('atagnotebook:'),
+                R.prop('key')
+              )
+            )(tObj)
           )
-        )(tObj)
-      )
-      .on('data', t => notebooks.push(t))
-      .on('end', () => r.resolve(notebooks))
+            .on('data', t => notebooks.push(t))
+            .on('end', () => r.resolve(notebooks))
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
+      })
   }).map(R.sortWith([R.descend(R.path(['value', 'count']))]))
+
 const getSiblingNotes = tObj =>
   task(r => {
     let notes = []
-    db()
-      .createReadStream(
-        R.compose(
-            createSelectors('tagsnotes:'),
-            R.prop('key')
-        )(tObj)
-      )
-      .on('data', t => notes.push(t))
-      .on('end', () => r.resolve(notes))
+    return db()
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.createReadStream(
+            R.compose(
+              createSelectors('tagsnotes:'),
+              R.prop('key')
+            )(tObj)
+          )
+            .on('data', t => notes.push(t))
+            .on('end', () => r.resolve(notes))
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
+      })
   }).map(R.sortWith([R.descend(R.path(['value', 'count']))]))
 
-const addNotebooks = limit => R.converge(
-  (notebooksT, t) => notebooksT.map(v => R.assoc('notebooks', v, t)),
-  [getNotebooks(limit), R.identity]
-)
+const addNotebooks = limit =>
+  R.converge(
+    (notebooksT, t) => notebooksT.map(v => R.assoc('notebooks', v, t)),
+    [getNotebooks(limit), R.identity]
+  )
 const addSiblingNotes = R.converge(
   (notesT, t) => notesT.map(v => R.assoc('notes', v, t)),
   [getSiblingNotes, R.identity]
@@ -108,7 +153,7 @@ const inNotebook = (o, t) =>
     R.any(
       R.compose(
         R.equals(R.path(['value', 'meta', 'nbook', 'uuid'], t)),
-        R.path(['value', 'uuid']),
+        R.path(['value', 'uuid'])
       )
     ),
     R.prop('notebooks')
@@ -117,10 +162,18 @@ const inNotebookC = R.curry(inNotebook)
 const getNotes = tObj =>
   task(r => {
     let notexs = []
-    db()
-      .createReadStream(createSelectors('tagsnotes:')(R.prop('key', tObj)))
-      .on('data', R.unless(inNotebookC(tObj), t => notexs.push(t)))
-      .on('end', () => r.resolve(notexs))
+    return db()
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.createReadStream(createSelectors('tagsnotes:')(R.prop('key', tObj)))
+            .on('data', R.unless(inNotebookC(tObj), t => notexs.push(t)))
+            .on('end', () => r.resolve(notexs))
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
+      })
   })
 
 const addNotes = R.converge(
@@ -142,12 +195,13 @@ const convertSiblingTagName = R.compose(
   R.nth(2),
   R.split(':')
 )
-const insertSiblingsNotebooks = limit => R.compose(
-  R.map(R.converge(R.set(R.lensProp('key')), [R.prop('_key'), R.identity])),
-  addNotebooks(limit),
-  R.over(R.lensProp('key'), convertSiblingTagName),
-  R.converge(R.assoc('_key'), [R.prop('key'), R.identity])
-)
+const insertSiblingsNotebooks = limit =>
+  R.compose(
+    R.map(R.converge(R.set(R.lensProp('key')), [R.prop('_key'), R.identity])),
+    addNotebooks(limit),
+    R.over(R.lensProp('key'), convertSiblingTagName),
+    R.converge(R.assoc('_key'), [R.prop('key'), R.identity])
+  )
 const insertSiblingsNotes = R.compose(
   R.map(R.converge(R.set(R.lensProp('key')), [R.prop('_key'), R.identity])),
   addSiblingNotes,
@@ -160,11 +214,12 @@ const addSiblingsNotebooksOld = R.over(
   R.map(insertSiblingsNotebooks)
 )
 
-const processSiblingNotebooks = limit => R.compose(
-  waitAll,
-  R.map(insertSiblingsNotebooks(limit)),
-  R.prop('siblings')
-)
+const processSiblingNotebooks = limit =>
+  R.compose(
+    waitAll,
+    R.map(insertSiblingsNotebooks(limit)),
+    R.prop('siblings')
+  )
 const processSiblingNotes = R.compose(
   waitAll,
   R.map(insertSiblingsNotes),
@@ -203,73 +258,100 @@ const removeNotebooksFromRoot = R.converge(
   [listChildNotebooks, R.identity]
 )
 const removeNotesFromRoot = R.converge(
-  (notexs, atag) =>
-    R.over(R.lensProp('notes'), filterNbooks(notexs), atag),
+  (notexs, atag) => R.over(R.lensProp('notes'), filterNbooks(notexs), atag),
   [listChildNotes, R.identity]
 )
 
 const listRootNotebooks = R.compose(
   R.map(getNbookfromKey),
-  R.prop('notebooks'),
+  R.prop('notebooks')
 )
 const listRootNotes = R.compose(
   R.map(getNbookfromKey),
-  R.prop('notes'),
+  R.prop('notes')
 )
-const filterSiblingNotebook = R.curry((sourcexs, targetxs) => R.filter(keyMatchesTag(sourcexs), targetxs))
-const filterSiblingNbooks = nbookxs => R.map(R.over(R.lensProp('notebooks'), filterSiblingNotebook(nbookxs)))
-const filterSiblingNotes = nbookxs => R.map(R.over(R.lensProp('notes'), filterSiblingNotebook(nbookxs)))
+const filterSiblingNotebook = R.curry((sourcexs, targetxs) =>
+  R.filter(keyMatchesTag(sourcexs), targetxs)
+)
+const filterSiblingNbooks = nbookxs =>
+  R.map(R.over(R.lensProp('notebooks'), filterSiblingNotebook(nbookxs)))
+const filterSiblingNotes = nbookxs =>
+  R.map(R.over(R.lensProp('notes'), filterSiblingNotebook(nbookxs)))
 const cleanChildNotebooks = R.converge(
   (nbookxs, atag) =>
     R.over(R.lensProp('siblings'), filterSiblingNbooks(nbookxs), atag),
-  [
-    listRootNotebooks,
-    R.identity
-  ]
+  [listRootNotebooks, R.identity]
 )
 
 const cleanChildNotes = R.converge(
   (notexs, atag) =>
     R.over(R.lensProp('siblings'), filterSiblingNotes(notexs), atag),
-  [
-    listRootNotes,
-    R.identity
-  ]
+  [listRootNotes, R.identity]
 )
 
-const addSiblingsNotebooks = limit => R.converge(
-  (processedSiblingNotebooksT, t) =>
-    processedSiblingNotebooksT.map(v => R.set(R.lensProp('siblings'), v, t)),
-  [processSiblingNotebooks(limit), R.identity]
-)
+const addSiblingsNotebooks = limit =>
+  R.converge(
+    (processedSiblingNotebooksT, t) =>
+      processedSiblingNotebooksT.map(v => R.set(R.lensProp('siblings'), v, t)),
+    [processSiblingNotebooks(limit), R.identity]
+  )
 
 const addSiblingsNote = R.converge(
   (processedSiblingNotesT, t) =>
     processedSiblingNotesT.map(v => R.set(R.lensProp('siblings'), v, t)),
   [processSiblingNotes, R.identity]
 )
-const filterSiblingsList = R.filter(R.converge(
-  R.compose(R.gt(R.__, 0), R.add),
-  [
-    R.compose(R.length, R.prop('notebooks')),
-    R.compose(R.length, R.prop('notes'))
-  ]
-))
+const filterSiblingsList = R.filter(
+  R.converge(
+    R.compose(
+      R.gt(R.__, 0),
+      R.add
+    ),
+    [
+      R.compose(
+        R.length,
+        R.prop('notebooks')
+      ),
+      R.compose(
+        R.length,
+        R.prop('notes')
+      )
+    ]
+  )
+)
 const removeEmptySiblings = R.over(R.lensProp('siblings'), filterSiblingsList)
 
 const orderSiblingsList = R.sortWith([
-  R.descend(R.compose(R.length, R.prop('notebooks'))),
-  R.descend(R.compose(R.length, R.prop('notes')))
+  R.descend(
+    R.compose(
+      R.length,
+      R.prop('notebooks')
+    )
+  ),
+  R.descend(
+    R.compose(
+      R.length,
+      R.prop('notes')
+    )
+  )
 ])
 const orderSiblings = R.over(R.lensProp('siblings'), orderSiblingsList)
 
 const processtags = () =>
   task(r => {
     let tagxs = []
-    db()
-      .createReadStream({ gt: 'atag:', lt: 'atag:~' })
-      .on('data', t => tagxs.push(t))
-      .on('end', () => r.resolve(tagxs))
+    return db()
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.createReadStream({ gt: 'atag:', lt: 'atag:~' })
+            .on('data', t => tagxs.push(t))
+            .on('end', () => r.resolve(tagxs))
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
+      })
   })
     .map(orderTags)
     .map(R.take(5))

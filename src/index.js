@@ -19,12 +19,20 @@ const getSiblings = nbookid => {
   let notes = []
   return task(r => {
     return db()
-      .createValueStream({
-        gt: `anotebook:${nbookid}:`,
-        lt: `anotebook:${nbookid}:~`
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.createValueStream({
+            gt: `anotebook:${nbookid}:`,
+            lt: `anotebook:${nbookid}:~`
+          })
+            .on('data', d => notes.push(d))
+            .on('end', () => r.resolve(notes))
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
       })
-      .on('data', d => notes.push(d))
-      .on('end', () => r.resolve(notes))
   })
 }
 
@@ -52,18 +60,26 @@ const end = r => next => {
   next()
 }
 
-const runme = () => {
-  return task(r =>
-    db()
-      .createValueStream({
-        keyAsBuffer: false,
-        valueAsBuffer: false,
-        gt: 'anote:',
-        lt: 'anote:~'
+function runme() {
+  return task(function _readDB(r) {
+    return db()
+      .run()
+      .listen({
+        onResolved: function dbResolved(v) {
+          v.createValueStream({
+            keyAsBuffer: false,
+            valueAsBuffer: false,
+            gt: 'anote:',
+            lt: 'anote:~'
+          })
+            .on('data', processNote)
+            .on('end', () => r.resolve('no more notes'))
+        },
+        onRejected: function dbError(e) {
+          r.reject(e)
+        }
       })
-      .on('data', processNote)
-      .on('end', () => r.resolve('no more notes'))
-  )
+  })
     .chain(createNotebookIndex)
     .chain(createIndex)
     .chain(createAbout)

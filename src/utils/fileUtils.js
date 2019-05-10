@@ -5,23 +5,20 @@ const { task, fromPromised, of } = require('folktale/concurrency/task')
 const cleanSpecialChars = require('clean-special-chars')
 
 function readFile(filename) {
-  return task(resolver =>
-    fs.readFile(
-      path.resolve(filename),
-      'utf-8',
-      (err, contents) =>
-        err ? resolver.reject(err) : resolver.resolve(contents)
-    )
-  )
+  return task(function readtask(resolver) {
+    return fs.readFile(path.resolve(filename), 'utf-8', function _readfile(
+      err,
+      contents
+    ) {
+      err ? resolver.reject(err) : resolver.resolve(contents)
+    })
+  })
 }
 
 function readDir(dirpath) {
   return task(resolver =>
-    fs.readdir(
-      path.resolve(dirpath),
-      'utf-8',
-      (err, contents) =>
-        err ? resolver.reject(err) : resolver.resolve(contents)
+    fs.readdir(path.resolve(dirpath), 'utf-8', (err, contents) =>
+      err ? resolver.reject(err) : resolver.resolve(contents)
     )
   )
 }
