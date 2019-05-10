@@ -4,9 +4,10 @@ const { of, waitAll } = require('folktale/concurrency/task')
 const { getNoteBooks } = require('./listNoteBooks')
 const createHTML = require('../../templates/generateNotebookIndexHTML')
 const { writeFile, createCleanPath } = require('./utils/fileUtils')
-const { notebookNotes } = require('./listNotes')
+const { notebookNotes, getFirstNote, getNote } = require('./listNotes')
 
 const logger = r => {
+  console.log('src/createNotebookIndexes.js')
   console.log('____')
   console.log(r)
   return r
@@ -54,12 +55,31 @@ const createHTMLandPath = R.compose(
   addPath
 )
 
+const addFirstNoteId = R.converge(
+  (noteT, nb) => noteT.map(t => R.assoc('note', t, nb)),
+  [
+    R.compose(getFirstNote, R.path(['notebook', 'uuid'])),
+    R.identity
+  ]
+)
+const getFirstNoteContents = R.converge(
+  (noteT, nb) => noteT.map(t => R.set(R.lensProp('note'), t, nb)),
+  [
+    R.compose(getNote, R.last, R.split(':'), R.head, R.prop('note')),
+    R.identity
+  ]
+)
+
 const createNotebookIndex = () =>
   getNoteBooks()
     .map(xs => R.map(R.assoc('notebooks', xs), xs))
     .map(R.map(mergeNotesList))
     .chain(waitAll)
     .map(R.map(splitToObj))
+    .map(R.map(addFirstNoteId))
+    .chain(waitAll)
+    .map(R.map(getFirstNoteContents))
+    .chain(waitAll)
     .map(
       R.map(
         R.ap(

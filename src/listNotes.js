@@ -34,5 +34,18 @@ const notebookNotes = nbookid => {
       .on('end', () => r.resolve(notes))
   )
 }
+const getFirstNote = nbookid => {
+  let notes = []
+  return task(r =>
+    db()
+      .createKeyStream({
+        gt: 'anotebook:' + nbookid,
+        lt: 'anotebook:' + nbookid + ':~',
+        limit: 1
+      })
+      .on('data', d => notes.push(d))
+      .on('end', () => r.resolve(notes))
+  )
+}
 
-module.exports = { latestNotes, notebookNotes }
+module.exports = { latestNotes, notebookNotes, getFirstNote, getNote }
