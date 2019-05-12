@@ -1,8 +1,8 @@
 const levelup = require('levelup')
 const encode = require('encoding-down')
 const leveldown = require('leveldown')
-const { readFile } = require('./utils/fileUtils')
-const { task, of } = require('folktale/concurrency/task')
+const { of } = require('folktale/concurrency/task')
+const getConfig = require('./readconfig')
 
 function logger(r) {
   console.log('getdb.js:')
@@ -15,12 +15,10 @@ function readDb() {
   if (db) {
     return of(db)
   } else {
-    return readFile('./config.json')
-      .map(JSON.parse)
-      .map(function openDB(r) {
-        db = levelup(encode(leveldown(r.quiverdb), { valueEncoding: 'json' }))
-        return db
-      })
+    return getConfig('quiverdb').map(function openDB(r) {
+      db = levelup(encode(leveldown(r), { valueEncoding: 'json' }))
+      return db
+    })
   }
 }
 

@@ -10,6 +10,7 @@ pat
 ```json
 {
   "dist": "/path/to/export/directory",
-  "quiverdb": "/path/to/leveldb/directory"
+  "quiverdb": "/path/to/leveldb/directory",
+  "templates": "/Users/bfulop/Work/Abundancia/abundanciahq/templates"
 }
 ```
