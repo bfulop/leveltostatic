@@ -40,6 +40,7 @@ const createhtmlprop = r => R.assoc('html', R.__, r)
 const createpathprop = r => R.assoc('path', R.__, r)
 
 const addHTML = R.ap(createhtmlprop, createHTML)
+
 const addPath = R.ap(
   createpathprop,
   R.compose(
@@ -50,22 +51,35 @@ const addPath = R.ap(
   )
 )
 
-const createHTMLandPath = R.compose(
-  addHTML,
-  addPath
-)
+function createHTMLandPath(d) {
+  return addHTML(d).chain(addPath)
+}
+
+// const createHTMLandPath =  R.compose(
+//   addHTML,
+//   addPath
+// )
 
 const addFirstNoteId = R.converge(
   (noteT, nb) => noteT.map(t => R.assoc('note', t, nb)),
   [
-    R.compose(getFirstNote, R.path(['notebook', 'uuid'])),
+    R.compose(
+      getFirstNote,
+      R.path(['notebook', 'uuid'])
+    ),
     R.identity
   ]
 )
 const getFirstNoteContents = R.converge(
   (noteT, nb) => noteT.map(t => R.set(R.lensProp('note'), t, nb)),
   [
-    R.compose(getNote, R.last, R.split(':'), R.head, R.prop('note')),
+    R.compose(
+      getNote,
+      R.last,
+      R.split(':'),
+      R.head,
+      R.prop('note')
+    ),
     R.identity
   ]
 )
