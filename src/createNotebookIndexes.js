@@ -5,6 +5,8 @@ import { getNoteBooks } from './listNoteBooks.js'
 import createHTML from '../../templates/generateNotebookIndexHTML.js'
 import { writeFile, createCleanPath } from './utils/fileUtils.js'
 import { notebookNotes, getFirstNote, getNote } from './listNotes.js'
+import renderWith from './utils/renderWith.js'
+import getConfig from './readconfig.js'
 
 const logger = r => {
   console.log('src/createNotebookIndexes.js')
@@ -21,7 +23,9 @@ const mergeNotesList = nbook =>
       R.prop('uuid')
     )
   )(nbook)
+
 const notebookLens = R.lensProp('notebook')
+
 const unwrapNotebook = r =>
   R.set(
     notebookLens,
@@ -30,6 +34,7 @@ const unwrapNotebook = r =>
       R.view(notebookLens)
     )(r)
   )(r)
+
 const splitToObj = R.compose(
   unwrapNotebook,
   R.zipObj(['notebook', 'notes']),
@@ -41,24 +46,32 @@ const createpathprop = r => R.assoc('path', R.__, r)
 
 const addHTML = R.ap(createhtmlprop, createHTML)
 
-const addPath = R.ap(
-  createpathprop,
-  R.compose(
-    R.concat(R.__, '/index.html'),
-    R.concat('./dist/'),
-    createCleanPath,
-    R.view(R.lensPath(['notebook', 'name']))
-  )
-)
+function addPathProp(data, distpath) {
+  return R.ap(
+    createpathprop,
+    R.compose(
+      R.concat(R.__, '/index.html'),
+      R.concat(distpath),
+      R.concat('/'),
+      createCleanPath,
+      R.view(R.lensPath(['notebook', 'name']))
+    )
+  )(data)
+}
 
-// function createHTMLandPath(d) {
-//   return addHTML(d).chain(addPath)
-// }
+function addPath(data) {
+  return getConfig('dist')
+    .map(R.curryN(2, addPathProp)(data))
+}
 
-const createHTMLandPath = R.compose(
-  addHTML,
-  addPath
-)
+function createHTMLandPath(d) {
+  return renderWith(d, 'generateNotebookIndexHTML.js').chain(addPath)
+}
+
+// const createHTMLandPath = R.compose(
+//   addHTML,
+//   addPath
+// )
 
 const addFirstNoteId = R.converge(
   (noteT, nb) => noteT.map(t => R.assoc('note', t, nb)),
@@ -108,6 +121,7 @@ function createNotebookIndex() {
     )
     .map(R.map(R.dissocPath(['notebook', 'notebooks'])))
     .map(R.map(createHTMLandPath))
+    .chain(waitAll)
     .map(R.map(writeFile))
     .chain(waitAll)
 }

@@ -1,9 +1,7 @@
 import R from 'ramda'
 import { readFile } from './utils/fileUtils.js'
-import F from 'folktale'
-const {
-  concurrency: { of }
-} = F
+import Task from 'folktale/concurrency/task/index.js'
+const { of } = Task
 
 var config = null
 
