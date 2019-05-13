@@ -9,7 +9,7 @@ function logger(r) {
   return r
 }
 
-function renderWith(data, renderer) {
+function renderWith(renderer, data) {
   return (
     getConfig('templates')
       .map(R.concat(R.__, '/'))

@@ -2,7 +2,6 @@ import R from 'ramda'
 import Task from 'folktale/concurrency/task/index.js'
 const { waitAll } = Task
 import { getNoteBooks } from './listNoteBooks.js'
-import createHTML from '../../templates/generateNotebookIndexHTML.js'
 import { writeFile, createCleanPath } from './utils/fileUtils.js'
 import { notebookNotes, getFirstNote, getNote } from './listNotes.js'
 import renderWith from './utils/renderWith.js'
@@ -44,8 +43,6 @@ const splitToObj = R.compose(
 const createhtmlprop = r => R.assoc('html', R.__, r)
 const createpathprop = r => R.assoc('path', R.__, r)
 
-const addHTML = R.ap(createhtmlprop, createHTML)
-
 function addPathProp(data, distpath) {
   return R.ap(
     createpathprop,
@@ -65,13 +62,8 @@ function addPath(data) {
 }
 
 function createHTMLandPath(d) {
-  return renderWith(d, 'generateNotebookIndexHTML.js').chain(addPath)
+  return renderWith('generateNotebookIndexHTML.js', d).chain(addPath)
 }
-
-// const createHTMLandPath = R.compose(
-//   addHTML,
-//   addPath
-// )
 
 const addFirstNoteId = R.converge(
   (noteT, nb) => noteT.map(t => R.assoc('note', t, nb)),
