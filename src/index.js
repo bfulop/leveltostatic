@@ -44,7 +44,6 @@ const processNote = (buf, enc, next) =>
     r =>
       r.run().listen({
         onResolved: r => {
-          // next()
           return createNotePage(r).run()
         }
       }),
