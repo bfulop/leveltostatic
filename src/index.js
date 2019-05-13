@@ -1,13 +1,11 @@
-const { task, of } = require('folktale/concurrency/task')
-const R = require('ramda')
-const db = require('./getdb')
-const to = require('to2')
-const through = require('through2')
-const { getNoteBooks } = require('./listNoteBooks')
-const createNotePage = require('./createNotePage')
-const createIndex = require('./createIndex')
-const createAbout = require('./createAbout')
-const { createNotebookIndex } = require('./createNotebookIndexes')
+import task from 'folktale/concurrency/task/task.js'
+import R from 'ramda'
+import db from './getdb.js'
+import { getNoteBooks } from './listNoteBooks.js'
+import createNotePage from './createNotePage.js'
+import createIndex from './createIndex.js'
+import createAbout from './createAbout.js'
+import { createNotebookIndex } from './createNotebookIndexes.js'
 
 const logger = r => {
   console.log('r')
@@ -85,4 +83,4 @@ function runme() {
     .chain(createAbout)
 }
 
-module.exports = runme
+export default runme

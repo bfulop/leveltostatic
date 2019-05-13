@@ -1,9 +1,8 @@
-const R = require('ramda')
-const { of } = require('folktale/concurrency/task')
-const createHTML = require('./createNoteHTMLPage')
-const writeFile = require('./utils/fileUtils').writeFile
+import Task from 'folktale/concurrency/task/index.js'
+const of = Task.of
+import createHTML from './createNoteHTMLPage.js'
+import { writeFile } from './utils/fileUtils.js'
 
-const createPage = noteObj => of(createHTML(noteObj))
-.chain(writeFile)
-
-module.exports = createPage
+export default function createPage(noteObj) {
+  return of(createHTML(noteObj)).chain(writeFile)
+}

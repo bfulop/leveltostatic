@@ -1,8 +1,8 @@
-const R = require('ramda')
-const fs = require('fs-extra')
-const path = require('path')
-const { task, fromPromised, of } = require('folktale/concurrency/task')
-const cleanSpecialChars = require('clean-special-chars')
+import R from 'ramda'
+import task from 'folktale/concurrency/task/task.js'
+import fs from 'fs-extra'
+import path from 'path'
+import cleanSpecialChars from 'clean-special-chars'
 
 function readFile(filename) {
   return task(function readtask(resolver) {
@@ -48,4 +48,4 @@ const createCleanPath = R.compose(
   r => cleanSpecialChars(r, { '&': 'and' })
 )
 
-module.exports = { readFile, readDir, writeFile, createCleanPath }
+export { readFile, readDir, writeFile, createCleanPath }

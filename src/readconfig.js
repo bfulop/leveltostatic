@@ -1,10 +1,13 @@
-const R = require('ramda')
-const { readFile } = require('./utils/fileUtils')
-const { task, of } = require('folktale/concurrency/task')
+import R from 'ramda'
+import { readFile } from './utils/fileUtils.js'
+import F from 'folktale'
+const {
+  concurrency: { of }
+} = F
 
 var config = null
 
-function getConfig(prop) {
+export default function getConfig(prop) {
   if (config) {
     return of(R.prop(prop, config))
   } else {
@@ -20,4 +23,3 @@ function getConfig(prop) {
   }
 }
 
-module.exports = getConfig

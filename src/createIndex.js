@@ -1,20 +1,25 @@
-const R = require('ramda')
-const { of, waitAll } = require('folktale/concurrency/task')
-const { getNoteBooks } = require('./listNoteBooks')
-const createHTML = require('../../templates/generateIndexHTML')
-const { writeFile } = require('./utils/fileUtils')
-const { latestNotes } = require('./listNotes')
-const { processtags } = require('./tagsHierarchy')
+import R from 'ramda'
+import F from 'folktale'
+const  of  = F.concurrency.task
+import { getNoteBooks } from './listNoteBooks.js'
+import createHTML from '../../templates/generateIndexHTML.js'
+import { writeFile } from './utils/fileUtils.js'
+import { latestNotes } from './listNotes.js'
+import { processtags } from './tagsHierarchy.js'
 
-const createIndex = () => R.traverse(of, R.identity, [getNoteBooks(), latestNotes(10), processtags()])
-  .map(R.zipObj(['notebooks', 'latestnotes', 'tags' ]))
-  .map(r => createHTML(r))
-  .map(
-    R.compose(
-      R.assoc('path', './dist/index.html'),
-      R.objOf('html')
+export default function createIndex() {
+  return R.traverse(of, R.identity, [
+    getNoteBooks(),
+    latestNotes(10),
+    processtags()
+  ])
+    .map(R.zipObj(['notebooks', 'latestnotes', 'tags']))
+    .map(r => createHTML(r))
+    .map(
+      R.compose(
+        R.assoc('path', './dist/index.html'),
+        R.objOf('html')
+      )
     )
-  )
-  .chain(writeFile)
-
-module.exports = createIndex
+    .chain(writeFile)
+}

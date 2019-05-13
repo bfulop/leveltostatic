@@ -1,7 +1,8 @@
-const R = require('ramda')
-const { task, of, fromPromised, waitAll } = require('folktale/concurrency/task')
-const Maybe = require('folktale/maybe')
-const db = require('./getdb')
+import R from 'ramda'
+import F from 'folktale'
+const { task, of, fromPromised, waitAll } = F.concurrency
+const Maybe = F.maybe
+import db from './getdb.js'
 
 const logger = r => {
   console.log('src/tagsHierarchy.js----------------------------')
@@ -372,4 +373,4 @@ const processtags = () =>
     .map(R.map(removeEmptySiblings))
     .map(R.map(orderSiblings))
 
-module.exports = { processtags }
+export { processtags }

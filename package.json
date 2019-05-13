@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "export to a static site",
   "main": "index.js",
+  "type": "module",
   "jest": {
     "testEnvironment": "node"
   },
@@ -34,8 +35,8 @@
     "fs-extra": "^7.0.1",
     "immutable": "^4.0.0-rc.12",
     "immutable-ext": "^1.1.5",
-    "level": "^4.0.0",
-    "leveldown": "^4.0.1",
+    "level": "^5.0.0",
+    "leveldown": "^5.0.1",
     "ramda": "^0.26.1",
     "through2": "^3.0.0",
     "to2": "^1.0.0"

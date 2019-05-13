@@ -1,5 +1,5 @@
-const { task } = require('folktale/concurrency/task')
-const db = require('./getdb')
+import task from 'folktale/concurrency/task/task.js'
+import db from './getdb.js'
 
 const logger = r => {
   console.log('listNoteBooks.js:')
@@ -7,7 +7,7 @@ const logger = r => {
   return r
 }
 
-function getNoteBooks() {
+export default function getNoteBooks() {
   let notebooks = []
   return task(function _readDB(r) {
     return db()
@@ -29,4 +29,5 @@ function getNoteBooks() {
   })
 }
 
-module.exports = { getNoteBooks }
+export { getNoteBooks }
+

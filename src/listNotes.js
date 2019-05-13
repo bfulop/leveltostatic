@@ -1,6 +1,7 @@
-const R = require('ramda')
-const { task, waitAll } = require('folktale/concurrency/task')
-const db = require('./getdb')
+import R from 'ramda'
+import Task from 'folktale/concurrency/task/index.js'
+const { task, waitAll } = Task
+import db from './getdb.js'
 
 const getNote = id =>
   task(r =>
@@ -89,4 +90,4 @@ const getFirstNote = nbookid => {
   )
 }
 
-module.exports = { latestNotes, notebookNotes, getFirstNote, getNote }
+export { latestNotes, notebookNotes, getFirstNote, getNote }

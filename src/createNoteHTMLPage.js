@@ -1,6 +1,6 @@
-const R = require('ramda')
-const generateNoteHTML = require('../../templates/generateNoteHTML')
-const { createCleanPath } = require('./utils/fileUtils')
+import R from 'ramda'
+import generateNoteHTML from '../../templates/generateNoteHTML.js'
+import { createCleanPath } from './utils/fileUtils.js'
 
 const logger = r => {
   console.log('r', r)
@@ -30,9 +30,8 @@ const createFilePath = R.compose(
 )
 const createPath = R.ap(R.mergeDeepLeft, createFilePath)
 
-const createPage = R.compose(
+export default R.compose(
   createNoteHTML,
   createPath
 )
 
-module.exports = createPage

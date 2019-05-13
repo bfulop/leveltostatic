@@ -1,6 +1,4 @@
-'use strict'
-
-var index = require('./index')
+import index from './index.js'
 
 index()
   .run()

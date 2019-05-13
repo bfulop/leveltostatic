@@ -1,10 +1,10 @@
-const R = require('ramda')
-const { List } = require('immutable-ext')
-const { of, waitAll } = require('folktale/concurrency/task')
-const { getNoteBooks } = require('./listNoteBooks')
-const createHTML = require('../../templates/generateNotebookIndexHTML')
-const { writeFile, createCleanPath } = require('./utils/fileUtils')
-const { notebookNotes, getFirstNote, getNote } = require('./listNotes')
+import R from 'ramda'
+import F from 'folktale'
+const  { of, waitAll }  = F.concurrency
+import { getNoteBooks } from './listNoteBooks.js'
+import createHTML from '../../templates/generateNotebookIndexHTML.js'
+import { writeFile, createCleanPath } from './utils/fileUtils.js'
+import { notebookNotes, getFirstNote, getNote } from './listNotes.js'
 
 const logger = r => {
   console.log('src/createNotebookIndexes.js')
@@ -110,4 +110,4 @@ const createNotebookIndex = () =>
     .map(R.map(writeFile))
     .chain(waitAll)
 
-module.exports = { createNotebookIndex, mergeNotesList }
+export { createNotebookIndex, mergeNotesList }
