@@ -79,7 +79,7 @@ function runme() {
   })
     .chain(createNotebookIndex)
     .chain(createIndex)
-    // .chain(createAbout)
+    .chain(createAbout)
 }
 
 export default runme
