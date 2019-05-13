@@ -1,5 +1,5 @@
 import Task from 'folktale/concurrency/task/index.js'
-const { of }= Task
+const { of } = Task
 import levelup from 'levelup'
 import encode from 'encoding-down'
 import leveldown from 'leveldown'

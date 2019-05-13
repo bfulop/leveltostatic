@@ -1,6 +1,7 @@
 import R from 'ramda'
+import Task from 'folktale/concurrency/task/index.js'
+const { task, of, fromPromised, waitAll } = Task
 import F from 'folktale'
-const { task, of, fromPromised, waitAll } = F.concurrency
 const Maybe = F.maybe
 import db from './getdb.js'
 
@@ -338,8 +339,8 @@ const orderSiblingsList = R.sortWith([
 ])
 const orderSiblings = R.over(R.lensProp('siblings'), orderSiblingsList)
 
-const processtags = () =>
-  task(r => {
+function processtags() {
+  return task(function _runtask(r){
     let tagxs = []
     return db()
       .run()
@@ -372,5 +373,5 @@ const processtags = () =>
     .map(R.map(removeNotesFromRoot))
     .map(R.map(removeEmptySiblings))
     .map(R.map(orderSiblings))
-
+}
 export { processtags }

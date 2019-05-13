@@ -3,8 +3,14 @@ import Task from 'folktale/concurrency/task/index.js'
 const { task, waitAll } = Task
 import db from './getdb.js'
 
-const getNote = id =>
-  task(r =>
+function logger(r) {
+  console.log('src/listNotes.js')
+  console.log(r)
+  return r
+}
+
+function getNote(id) {
+  return task(r =>
     db()
       .run()
       .listen({
@@ -16,6 +22,7 @@ const getNote = id =>
         }
       })
   )
+}
 
 const getNoteId = R.compose(
   R.last,
@@ -23,6 +30,7 @@ const getNoteId = R.compose(
 )
 
 function latestNotes(limit) {
+  debugger
   let notes = []
   return task(function _runtask(r) {
     return db()

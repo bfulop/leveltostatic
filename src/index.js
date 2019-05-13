@@ -8,7 +8,7 @@ import createAbout from './createAbout.js'
 import { createNotebookIndex } from './createNotebookIndexes.js'
 
 const logger = r => {
-  console.log('r')
+  console.log('src/index.js')
   console.log(r)
   return r
 }
@@ -80,7 +80,7 @@ function runme() {
   })
     .chain(createNotebookIndex)
     .chain(createIndex)
-    .chain(createAbout)
+    // .chain(createAbout)
 }
 
 export default runme

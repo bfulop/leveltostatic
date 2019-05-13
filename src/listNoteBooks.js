@@ -20,7 +20,9 @@ export default function getNoteBooks() {
               lt: 'notebooks:~'
             })
             .on('data', d => notebooks.push(d))
-            .on('end', () => r.resolve(notebooks))
+            .on('end', function finished() {
+              return r.resolve(notebooks)
+            })
         },
         onRejected: function dbError(e) {
           r.reject(e)
@@ -30,4 +32,3 @@ export default function getNoteBooks() {
 }
 
 export { getNoteBooks }
-

@@ -6,7 +6,9 @@ const logger = r => {
   console.log('r', r)
   return r
 }
+
 const createNoteHTML = R.ap(
+
   R.mergeDeepLeft,
   R.compose(
     R.objOf('html'),

@@ -1,6 +1,6 @@
 import R from 'ramda'
-import F from 'folktale'
-const  { of, waitAll }  = F.concurrency
+import Task from 'folktale/concurrency/task/index.js'
+const { waitAll } = Task
 import { getNoteBooks } from './listNoteBooks.js'
 import createHTML from '../../templates/generateNotebookIndexHTML.js'
 import { writeFile, createCleanPath } from './utils/fileUtils.js'
@@ -51,14 +51,14 @@ const addPath = R.ap(
   )
 )
 
-function createHTMLandPath(d) {
-  return addHTML(d).chain(addPath)
-}
+// function createHTMLandPath(d) {
+//   return addHTML(d).chain(addPath)
+// }
 
-// const createHTMLandPath =  R.compose(
-//   addHTML,
-//   addPath
-// )
+const createHTMLandPath = R.compose(
+  addHTML,
+  addPath
+)
 
 const addFirstNoteId = R.converge(
   (noteT, nb) => noteT.map(t => R.assoc('note', t, nb)),
@@ -70,6 +70,7 @@ const addFirstNoteId = R.converge(
     R.identity
   ]
 )
+
 const getFirstNoteContents = R.converge(
   (noteT, nb) => noteT.map(t => R.set(R.lensProp('note'), t, nb)),
   [
@@ -84,8 +85,8 @@ const getFirstNoteContents = R.converge(
   ]
 )
 
-const createNotebookIndex = () =>
-  getNoteBooks()
+function createNotebookIndex() {
+  return getNoteBooks()
     .map(xs => R.map(R.assoc('notebooks', xs), xs))
     .map(R.map(mergeNotesList))
     .chain(waitAll)
@@ -109,5 +110,6 @@ const createNotebookIndex = () =>
     .map(R.map(createHTMLandPath))
     .map(R.map(writeFile))
     .chain(waitAll)
+}
 
 export { createNotebookIndex, mergeNotesList }
