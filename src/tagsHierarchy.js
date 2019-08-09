@@ -93,6 +93,38 @@ const addSiblings = R.converge(
   [getSiblings, R.identity]
 )
 
+function containsString(teststring) {
+  return function runTest(s) {
+    console.log('teststring', teststring, 's', s, teststring.indexOf(s) != -1)
+    return teststring.indexOf(s) != -1
+  }
+}
+
+function listPresentInString(xs) {
+  return function doTest(astring) {
+    var result = R.any(containsString(astring), xs)
+    console.log(result)
+    return result
+  }
+}
+
+const getLeafTag = R.compose(R.last, R.split(':'))
+
+const removeTopLevelSiblings = R.converge(
+  function filterSiblingTags(rootTags, tagsHierarchy){
+    console.log(rootTags)
+    return R.map(
+      R.over(
+        R.lensProp('siblings'), 
+        R.reject(R.compose(listPresentInString(rootTags), getLeafTag, R.prop('key')))
+      ),
+      tagsHierarchy)
+  },
+  [
+    R.map(R.compose(getLeafTag, R.prop('key'))),
+    R.identity
+  ])
+
 const getNotebooks = limit => tObj =>
   task(r => {
     let notebooks = []
@@ -356,9 +388,10 @@ function processtags() {
       })
   })
     .map(orderTags)
-    .map(R.take(5))
+    .map(R.take(6))
     .map(R.map(addSiblings))
     .chain(waitAll)
+    .map(removeTopLevelSiblings)
     .map(R.map(addNotebooks(50)))
     .chain(waitAll)
     .map(R.map(addNotes))
@@ -374,4 +407,5 @@ function processtags() {
     .map(R.map(removeEmptySiblings))
     .map(R.map(orderSiblings))
 }
+
 export { processtags }

@@ -6,7 +6,7 @@ jest.mock('./getdb')
 const getDb = require('./getdb')
 getDb.mockReturnValue(db)
 
-describe('simple case, new tag to add', () => {
+describe('simple ordering', () => {
   const subject = require('./summariseTags').orderTags
   let result
   const tag001 = {
@@ -49,7 +49,7 @@ describe('simple case, new tag to add', () => {
     result = subject([tag001,tag002,tag003])
     done()
   })
-  test('orders the tags', () => {
+  test('gets the highest parent ratio', () => {
     expect(result[0]).toMatchObject({parentratio: 10})
   })
 })
