@@ -30,7 +30,6 @@ const getNoteId = R.compose(
 )
 
 function latestNotes(limit) {
-  debugger
   let notes = []
   return task(function _runtask(r) {
     return db()
