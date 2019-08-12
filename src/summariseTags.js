@@ -3,8 +3,8 @@ const { task, of } = require('folktale/concurrency/task')
 const db = require('./getdb')
 
 const orderTags = R.sortWith([
-  R.descend(R.prop('parentratio')),
-  R.descend(R.prop('size'))
+  R.descend(R.prop('size')),
+  // R.descend(R.prop('parentratio'))
 ])
 
 const getAllTags = () =>

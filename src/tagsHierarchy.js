@@ -38,8 +38,8 @@ const getT = R.compose(
 )
 
 const orderTags = R.sortWith([
+  R.descend(R.path(['value', 'count'])),
   R.descend(R.path(['value', 'parentratio'])),
-  R.descend(R.path(['value', 'count']))
 ])
 
 const createSelectors = listname =>
@@ -95,7 +95,6 @@ const addSiblings = R.converge(
 
 function containsString(teststring) {
   return function runTest(s) {
-    console.log('teststring', teststring, 's', s, teststring.indexOf(s) != -1)
     return teststring.indexOf(s) != -1
   }
 }
